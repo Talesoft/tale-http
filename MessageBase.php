@@ -2,6 +2,7 @@
 
 namespace Tale\Http;
 
+use InvalidArgumentException;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -15,13 +16,24 @@ abstract class MessageBase implements MessageInterface
     private $_headerNames;
     private $_body;
 
-    public function __construct(StreamInterface $body)
+    private $_messageString;
+
+    public function __construct(
+        StreamInterface $body = null,
+        array $headers = null,
+        $protocolVersion = null
+    )
     {
 
-        $this->_protocolVersion = self::DEFAULT_VERSION;
+        $this->_protocolVersion = $protocolVersion
+                                ? $protocolVersion
+                                : self::DEFAULT_VERSION;
         $this->_headers = [];
         $this->_headerNames = [];
-        $this->_body = $body;
+        $this->_body = $body ? $body : Stream::createMemory('rb+');
+
+        if ($headers)
+            $this->_addHeaders($headers);
     }
 
     public function getProtocol()
@@ -89,7 +101,7 @@ abstract class MessageBase implements MessageInterface
     {
 
         if (!$this->hasHeader($name))
-            return null;
+            return '';
 
         return implode(',', $this->getHeader($name));
     }
@@ -100,15 +112,14 @@ abstract class MessageBase implements MessageInterface
     public function withHeader($name, $value)
     {
 
-        if (!is_array($value))
-            $value = [$value];
-
-        $value = array_map('strval', $value);
-        $lowerName = strtolower($name);
-
         $message = clone $this;
-        $message->_headerNames[$lowerName] = $name;
-        $message->_headers[$name] = $value;
+
+        //Make sure to remove the current header with the same
+        //name to avoid casing-duplication (location, Location, LOCATION)
+        if ($message->hasHeader($name))
+            $message = $message->withoutHeader($name);
+
+        $message->_addHeaders([$name => $value]);
 
         return $message;
     }
@@ -164,18 +175,87 @@ abstract class MessageBase implements MessageInterface
         return $message;
     }
 
+    private function _filterHeaderName($value)
+    {
+
+        return preg_replace('/[^a-zA-Z0-9\-_]/', '', $value);
+    }
+
+    private function _filterHeaderValue($value)
+    {
+
+        if (!is_array($value))
+            $value = [$value];
+
+        foreach ($value as $i => $val) {
+
+            if (!is_string($val))
+                throw new InvalidArgumentException(
+                    "The header value can only consist of string values"
+                );
+
+            if (strpos($val, "\r") !== false || strpos($val, "\n") !== false)
+                throw new InvalidArgumentException(
+                    "Header values should never contain CR or LF characters"
+                );
+
+            $value[$i] = str_replace(["\r", "\n", "\0"], '', $val);
+        }
+
+        return $value;
+    }
+
+    private function _addHeaders(array $headers)
+    {
+
+        foreach ($headers as $name => $value) {
+
+            if (!is_string($name)) {
+
+                throw new InvalidArgumentException(
+                    "The passed header name is not a string"
+                );
+            }
+
+            if (strpos($name, "\r") !== false || strpos($name, "\n") !== false)
+                throw new InvalidArgumentException(
+                    "Header values should never contain CR or LF characters"
+                );
+
+            $name = $this->_filterHeaderName($name);
+            $value = $this->_filterHeaderValue($value);
+
+            $lowerName = strtolower($name);
+            $this->_headers[$name] = $value;
+            $this->_headerNames[$lowerName] = $name;
+        }
+    }
+
+    abstract protected function getInitialHeaderLine();
+
     public function __toString()
     {
 
+        if ($this->_messageString !== null)
+            return $this->_messageString;
+
         $crlf = "\r\n";
-        $headers = [];
+        $headers = [$this->getInitialHeaderLine().$crlf];
         foreach ($this->_headerNames as $name) {
 
             $headers[] = "$name: ".$this->getHeaderLine($name).$crlf;
         }
 
-        $body = $this->_body->getContents();
+        $body = strval($this->_body);
 
-        return implode('', $headers).$crlf.$body;
+        $this->_messageString = implode('', $headers).$crlf.$body;
+
+        return $this->_messageString;
+    }
+
+    public function __clone()
+    {
+
+        $this->_messageString = null;
     }
 }

@@ -14,12 +14,12 @@ class Stream implements StreamInterface
     const INPUT = 'php://input';
     const OUTPUT = 'php://output';
 
-    const DEFAULT_CONTEXT = self::TEMP;
+    const DEFAULT_CONTEXT = self::MEMORY;
     const DEFAULT_MODE = 'rb+';
 
     private $_context;
     private $_mode;
-    private $_data;
+    private $_metadata;
 
     public function __construct($context = null, $mode = null)
     {
@@ -35,23 +35,7 @@ class Stream implements StreamInterface
                 "Argument 1 needs to be resource or path/URI"
             );
 
-        $this->_data = stream_get_meta_data($this->_context);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __toString()
-    {
-
-        if (!$this->isReadable()) {
-            return '';
-        }
-
-        if ($this->isSeekable())
-            $this->rewind();
-
-        return $this->getContents();
+        $this->_metadata = stream_get_meta_data($this->_context);
     }
 
     /**
@@ -76,7 +60,7 @@ class Stream implements StreamInterface
 
         $context = $this->_context;
         $this->_context = null;
-        $this->_data = null;
+        $this->_metadata = null;
 
         return $context;
     }
@@ -163,7 +147,8 @@ class Stream implements StreamInterface
         if (!$this->_context)
             return false;
 
-        return is_writable($this->getMetadata('uri'));
+        $mode = $this->getMetadata('mode');
+        return (strstr($mode, 'w') || strstr($mode, 'x') || strstr($mode, 'c') || strstr($mode, '+'));
     }
 
     /**
@@ -228,12 +213,28 @@ class Stream implements StreamInterface
     {
 
         if ($key === null)
-            return $this->_data;
+            return $this->_metadata;
 
-        if (!isset($this->_data[$key]))
+        if (!isset($this->_metadata[$key]))
             return null;
 
-        return $this->_data[$key];
+        return $this->_metadata[$key];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __toString()
+    {
+
+        if (!$this->isReadable()) {
+            return '';
+        }
+
+        if ($this->isSeekable())
+            $this->rewind();
+
+        return $this->getContents();
     }
 
     public static function createMemory($mode = null)

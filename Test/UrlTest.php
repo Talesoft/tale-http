@@ -327,7 +327,6 @@ class UriTest extends TestCase
     }
 
     /**
-     * @group        48
      * @dataProvider mutations
      */
     public function testMutationResetsUriStringPropertyInClone($method, $value)
@@ -341,9 +340,6 @@ class UriTest extends TestCase
         $this->assertAttributeEquals($string, '_uriString', $uri);
     }
 
-    /**
-     * @group 40
-     */
     public function testPathIsProperlyEncoded()
     {
 
@@ -373,7 +369,6 @@ class UriTest extends TestCase
     }
 
     /**
-     * @group        40
      * @dataProvider queryStringsForEncoding
      */
     public function testQueryIsProperlyEncoded($query, $expected)
@@ -384,7 +379,6 @@ class UriTest extends TestCase
     }
 
     /**
-     * @group        40
      * @dataProvider queryStringsForEncoding
      */
     public function testQueryIsNotDoubleEncoded($query, $expected)
@@ -394,9 +388,6 @@ class UriTest extends TestCase
         $this->assertEquals($expected, $uri->getQuery());
     }
 
-    /**
-     * @group 40
-     */
     public function testFragmentIsProperlyEncoded()
     {
 
@@ -405,9 +396,6 @@ class UriTest extends TestCase
         $this->assertEquals($expected, $uri->getFragment());
     }
 
-    /**
-     * @group 40
-     */
     public function testFragmentIsNotDoubleEncoded()
     {
 

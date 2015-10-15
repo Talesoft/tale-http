@@ -38,57 +38,8 @@ class Uri implements UriInterface
         $this->_fragment = null;
         $this->_uriString = null;
 
-        if (!empty($uriString))
+        if ($uriString !== null)
             $this->_parse($uriString);
-    }
-
-    private function _parse($uriString)
-    {
-        //We don't expose _parse since it mutates and URI shouldn't be mutable
-        //Having all properties in the constructor sucks as well, when they
-        //are all strings anyways. So we rather take the parse_url overhead
-
-        $parsed = parse_url($uriString);
-
-        if (!is_array($parsed))
-            throw new InvalidArgumentException(
-                "Passed URI string doesn't seem to be a valid URI"
-            );
-
-        $parts = array_replace([
-            'scheme' => null,
-            'user' => null,
-            'pass' => null,
-            'host' => null,
-            'port' => null,
-            'path' => null,
-            'query' => null,
-            'fragment' => null
-        ], $parsed);
-
-        if ($parts['scheme'])
-            $this->_scheme = $this->_filterScheme($parts['scheme']);
-
-        if ($parts['user'])
-            $this->_user = $parts['user'];
-
-        if ($parts['pass'])
-            $this->_password = $parts['pass'];
-
-        if ($parts['host'])
-            $this->_host = $this->_filterHost($parts['host']);
-
-        if ($parts['port'])
-            $this->_port = $this->_filterPort($parts['port']);
-
-        if ($parts['path'])
-            $this->_path = $this->_filterPath($parts['path']);
-
-        if ($parts['query'])
-            $this->_query = $this->_filterQuery($parts['query']);
-
-        if ($parts['fragment'])
-            $this->_fragment = $this->_filterFragment($parts['fragment']);
     }
 
     /**
@@ -294,10 +245,55 @@ class Uri implements UriInterface
         return $uri;
     }
 
-    private function _filterPath($path)
+    private function _parse($uriString)
     {
 
-        return $this->_encode($path);
+        if (!is_string($uriString))
+            throw new InvalidArgumentException(
+                "Passed URI string needs to be a string value"
+            );
+
+        $parsed = parse_url($uriString);
+
+        if (!is_array($parsed))
+            throw new InvalidArgumentException(
+                "Passed URI string doesn't seem to be a valid URI"
+            );
+
+        $parts = array_replace([
+            'scheme' => null,
+            'user' => null,
+            'pass' => null,
+            'host' => null,
+            'port' => null,
+            'path' => null,
+            'query' => null,
+            'fragment' => null
+        ], $parsed);
+
+        if ($parts['scheme'])
+            $this->_scheme = $this->_filterScheme($parts['scheme']);
+
+        if ($parts['user'])
+            $this->_user = $parts['user'];
+
+        if ($parts['pass'])
+            $this->_password = $parts['pass'];
+
+        if ($parts['host'])
+            $this->_host = $this->_filterHost($parts['host']);
+
+        if ($parts['port'])
+            $this->_port = $this->_filterPort($parts['port']);
+
+        if ($parts['path'])
+            $this->_path = $this->_filterPath($parts['path']);
+
+        if ($parts['query'])
+            $this->_query = $this->_filterQuery($parts['query']);
+
+        if ($parts['fragment'])
+            $this->_fragment = $this->_filterFragment($parts['fragment']);
     }
 
     private function _filterScheme($scheme)
@@ -351,6 +347,24 @@ class Uri implements UriInterface
             );
 
         return $port;
+    }
+
+    private function _filterPath($path)
+    {
+
+        if (empty($path))
+            return null;
+
+        if (strpos($path, '#') !== false || strpos($path, '?') !== false)
+            throw new InvalidArgumentException(
+                "The passed path shouldn't contain a query or fragment"
+            );
+
+        $authority = $this->getAuthority();
+         if (empty($authority) && strncmp($path, '//', 2) === 0)
+            $path = '/'.ltrim($path, '/');
+
+        return $this->_encode($path);
     }
 
     private function _filterQuery($query)
