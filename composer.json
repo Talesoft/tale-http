@@ -1,0 +1,36 @@
+{
+    "name": "talesoft/tale-http",
+    "type": "library",
+    "keywords": ["http", "request", "response", "psr-7"],
+    "description": "A PSR-7 compatible HTTP utility library",
+    "license": "MIT",
+    "homepage": "http://http.talesoft.io",
+    "authors": [
+        {
+            "name": "Tale Jade Community",
+            "homepage": "https://github.com/Talesoft/tale-http/graphs/contributors"
+        },
+        {
+            "name": "Talesoft",
+            "homepage": "http://talesoft.io",
+            "email": "info@talesoft.io"
+        },
+        {
+            "name": "Torben Koehn",
+            "email": "tk@talesoft.io"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.5.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": ">=4.0",
+        "psr/http-message": ">=1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Tale\\Http\\": ""
+        }
+    }
+}
