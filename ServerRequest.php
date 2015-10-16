@@ -190,19 +190,18 @@ class ServerRequest extends Request implements ServerRequestInterface
         switch(strtolower($contentType)) {
             case 'application/json':
 
-                $this->_parsedBody = json_decode($body);
+                $this->_parsedBody = json_decode($this->getBodyString());
                 break;
             case 'text/xml':
 
-                $this->_parsedBody = simplexml_load_string($body);
+                $this->_parsedBody = simplexml_load_string($this->getBodyString());
                 break;
             default:
 
-                parse_str($body, $this->_parsedBody);
+                parse_str($this->getBodyString(), $this->_parsedBody);
                 break;
         }
 
-        $body->rewind();
         return $this->_parsedBody;
     }
 
@@ -220,16 +219,14 @@ class ServerRequest extends Request implements ServerRequestInterface
         $request = clone $this;
 
         $request->_parsedBody = $data;
-        $newBody = Stream::createMemoryStream();
 
         $contentType = $this->getHeaderLine('content-type');
-
         if (!empty($data)) {
 
             switch (strtolower($contentType)) {
                 case 'application/json':
 
-                    $newBody->write(json_encode($data));
+                    $data = json_encode($data);
                     break;
                 case 'text/xml':
 
@@ -239,13 +236,12 @@ class ServerRequest extends Request implements ServerRequestInterface
                     break;
                 default:
 
-                    $newBody->write(http_build_query((array)$data));
+                    $data = http_build_query((array)$data);
                     break;
             }
         }
 
-        $newBody->rewind();
-        return $request->withBody($newBody);
+        return $request->withBodyString($data);
     }
 
     /**

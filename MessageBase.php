@@ -163,6 +163,15 @@ abstract class MessageBase implements MessageInterface
         return $this->_body;
     }
 
+    public function getBodyString()
+    {
+
+        $string = (string)$this->_body;
+        $this->_body->rewind();
+
+        return $string;
+    }
+
     /**
      * @inheritDoc
      */
@@ -173,6 +182,12 @@ abstract class MessageBase implements MessageInterface
         $message->_body = $body;
 
         return $message;
+    }
+
+    public function withBodyString($bodyString)
+    {
+
+        return $this->withBody(new StringStream($bodyString));
     }
 
     private function _filterHeaderName($value)

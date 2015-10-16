@@ -29,7 +29,7 @@ $req = (new ServerRequest())
 
 $response = $req->createResponse()
     ->withHeader('Content-Type', 'application/json')
-    ->withBody(new StringStream(json_encode(['a' => 'b', 'c' => 'd'])));
+    ->withBodyString(json_encode(['a' => 'b', 'c' => 'd']));
 
 
 $response->emit();
