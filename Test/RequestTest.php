@@ -61,7 +61,7 @@ class RequestTest extends TestCase
     public function testConstructorCanAcceptAllMessageParts()
     {
         $uri     = new Uri('http://example.com/');
-        $body    = Stream::createMemory();
+        $body    = Stream::createMemoryStream();
         $headers = [
             'x-foo' => ['bar'],
         ];
@@ -324,7 +324,7 @@ class RequestTest extends TestCase
     public function testResponseConvertsToStringProperly()
     {
 
-        $body = Stream::createMemory('rb+');
+        $body = Stream::createMemoryStream('rb+');
         $body->write('This is my request body!');
 
         $expected = "GET /some-path?some=query HTTP/1.1\r\nX-Test: test-value\r\nX-Test-2: test-1,test-2\r\nHost: example.com\r\n\r\nThis is my request body!";

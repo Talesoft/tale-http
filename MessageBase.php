@@ -30,7 +30,7 @@ abstract class MessageBase implements MessageInterface
                                 : self::DEFAULT_VERSION;
         $this->_headers = [];
         $this->_headerNames = [];
-        $this->_body = $body ? $body : Stream::createMemory('rb+');
+        $this->_body = $body ? $body : Stream::createMemoryStream();
 
         if ($headers)
             $this->_addHeaders($headers);

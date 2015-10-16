@@ -38,6 +38,12 @@ class Stream implements StreamInterface
         $this->_metadata = stream_get_meta_data($this->_context);
     }
 
+    public function __destruct()
+    {
+
+        $this->close();
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -237,13 +243,13 @@ class Stream implements StreamInterface
         return $this->getContents();
     }
 
-    public static function createMemory($mode = null)
+    public static function createMemoryStream($mode = null)
     {
 
         return new self(self::MEMORY, $mode);
     }
 
-    public static function createTemp($mode = null, $maxMemory = null)
+    public static function createTempStream($mode = null, $maxMemory = null)
     {
 
         //$maxMemory is in BYTES
@@ -256,13 +262,13 @@ class Stream implements StreamInterface
         return new self($context, $mode);
     }
 
-    public static function createInput()
+    public static function createInputStream()
     {
 
         return new self(self::INPUT, 'rb');
     }
 
-    public static function createOuput()
+    public static function createOutputStream()
     {
 
         return new self(self::OUTPUT, 'wb');

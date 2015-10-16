@@ -4,7 +4,6 @@ namespace Tale\Http;
 
 use InvalidArgumentException;
 use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 
@@ -92,6 +91,42 @@ class Request extends MessageBase implements RequestInterface
         return $this->_method;
     }
 
+    public function isMethod($method)
+    {
+
+        return $this->_method === $method;
+    }
+
+    public function isGet()
+    {
+
+        return $this->isMethod(Method::GET);
+    }
+
+    public function isPost()
+    {
+
+        return $this->isMethod(Method::POST);
+    }
+
+    public function isPut()
+    {
+
+        return $this->isMethod(Method::PUT);
+    }
+
+    public function isPostOrPut()
+    {
+
+        return $this->isPost() || $this->isPut();
+    }
+
+    public function isDelete()
+    {
+
+        return $this->isMethod(Method::DELETE);
+    }
+
     /**
      * @inheritDoc
      */
@@ -131,6 +166,33 @@ class Request extends MessageBase implements RequestInterface
             $uriHost .= ":$uriPort";
 
         return $request->withHeader('Host', $uriHost);
+    }
+
+    /**
+     *
+     * @todo Maybe automatically translate some request headers to fitting response headers?
+     * @param null       $statusCode
+     * @param array|null $headers
+     * @param null       $reasonPhrase
+     * @param null       $protocolVersion
+     *
+     * @return Response
+     */
+    public function createResponse(
+        $statusCode = null,
+        array $headers = null,
+        $reasonPhrase = null,
+        $protocolVersion = null
+    )
+    {
+
+        return new Response(
+            Stream::createTempStream(),
+            $statusCode,
+            $headers,
+            $reasonPhrase,
+            $protocolVersion ? $protocolVersion : $this->getProtocolVersion()
+        );
     }
 
     private function _filterMethod($method)

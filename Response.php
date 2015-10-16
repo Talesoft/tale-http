@@ -68,6 +68,22 @@ class Response extends MessageBase implements ResponseInterface
         return $this->_reasonPhrase;
     }
 
+    public function emit()
+    {
+
+        header($this->getInitialHeaderLine(), true, $this->getStatusCode());
+        foreach ($this->getHeaders() as $name => $value) {
+
+            header("$name: ".implode(',', $value));
+        }
+
+        $body = $this->getBody();
+        echo $body;
+        $body->rewind();
+
+        return $this;
+    }
+
     private function _filterStatusCode($code)
     {
 

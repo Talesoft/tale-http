@@ -16,7 +16,7 @@ class MessageTest extends TestCase
 
     public function setUp()
     {
-        $this->stream = Stream::createMemory('wb+');
+        $this->stream = Stream::createMemoryStream('wb+');
         $this->message = new Response($this->stream);
     }
 
@@ -39,7 +39,7 @@ class MessageTest extends TestCase
 
     public function testBodyMutatorReturnsCloneWithChanges()
     {
-        $stream = Stream::createMemory('wb+');
+        $stream = Stream::createMemoryStream('wb+');
         $message = $this->message->withBody($stream);
         $this->assertNotSame($this->message, $message);
         $this->assertSame($stream, $message->getBody());

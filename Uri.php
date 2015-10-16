@@ -1,30 +1,187 @@
 <?php
+/**
+ * The Tale Jade Default Filters.
+ *
+ * Contains a static filter class that provides some basic
+ * filters for use inside Jade-files. You can define own filters
+ * by passing the 'filter'-option to the Compiler you compile
+ * your Jade files with
+ *
+ * This file is part of the Tale Jade Template Engine for PHP
+ *
+ * LICENSE:
+ * The code of this file is distributed under the MIT license.
+ * If you didn't receive a copy of the license text, you can
+ * read it here http://licenses.talesoft.io/2015/MIT.txt
+ *
+ * @category   HTTP, Utilities
+ * @package    Tale\Http
+ * @author     Torben Koehn <tk@talesoft.io>
+ * @author     Talesoft <info@talesoft.io>
+ * @copyright  Copyright (c) 2015 Talesoft (http://talesoft.io)
+ * @license    http://licenses.talesoft.io/2015/MIT.txt MIT License
+ * @version    1.1
+ * @link       http://http.talesoft.io/docs/files/Uri.html
+ * @since      File available since Release 1.0
+ */
 
 namespace Tale\Http;
 
 use InvalidArgumentException;
 use Psr\Http\Message\UriInterface;
 
+/**
+ * Acts as a wrapper for all kind of URIs (Including URNs and URLs)
+ *
+ * Compatible to the UriInterface or PSR-7
+ *
+ * Examples:
+ * <code>
+ *
+ * $uri = new Uri('http://example.com:8080');
+ * $uri = new Uri('/');
+ * $uri = new Uri('/some/path/somewhere');
+ * $uri = new Uri('urn:some:random:book');
+ *
+ * </code>
+ *
+ * {@inheritdoc}
+ *
+ * @see        https://github.com/php-fig/http-message/blob/master/src/UriInterface.php
+ * @category   HTTP, Utilities
+ * @package    Tale\Http
+ * @author     Torben Koehn <tk@talesoft.io>
+ * @author     Talesoft <info@talesoft.io>
+ * @copyright  Copyright (c) 2015 Talesoft (http://talesoft.io)
+ * @license    http://licenses.talesoft.io/2015/MIT.txt MIT License
+ * @version    1.1
+ * @link       http://http.talesoft.io/docs/classes/Tale.Http.Uri.html
+ * @since      File available since Release 1.0
+ */
 class Uri implements UriInterface
 {
 
+
+    /**
+     * Contains the schemes that the HTTP abstraction is able to handle.
+     *
+     * Since this is a HTTP abstraction, there are only HTTP and HTTPS available.
+     * More available schemes may be HTTP-based protocols like DAV.
+     *
+     * @var array
+     */
     private static $_schemes = [
         'http' => 80,
         'https' => 443
     ];
 
+    /**
+     * The scheme this URI contains
+     *
+     * e.g. {{https}}://example.com
+     *
+     * @var string|null
+     */
     private $_scheme;
+
+    /**
+     * The user this URI is associated with
+     *
+     * e.g. {{user}}@example.com
+     *
+     * @var string|null
+     */
     private $_user;
+
+    /**
+     * The password this URI is associated with
+     *
+     * e.g. user:{{password}}@example.com
+     *
+     * @var string|null
+     */
     private $_password;
+
+    /**
+     * The host this URI points to
+     *
+     * e.g. http://user@{{example.com}}/test
+     *
+     * @var string|null
+     */
     private $_host;
+
+    /**
+     * The port this URI points to
+     *
+     * e.g. http://example.com:{{8080}}/test
+     *
+     * @var string|null
+     */
     private $_port;
+
+    /**
+     * The path this URI points to
+     *
+     * e.g. http://example.com{{/some/sub/path}}
+     *
+     * @var string|null
+     */
     private $_path;
+
+    /**
+     * The query string this URI contains
+     *
+     * e.g. http://example.com/test?{{var1=val1&var2=val2}}
+     *
+     * @var array
+     */
     private $_query;
+
+    /**
+     * The fragment the URI contains
+     *
+     * e.g. http://example.com/test#{{someFragment}}
+     *
+     * @var string|null
+     */
     private $_fragment;
 
+    /**
+     * A cache for the fully generated URI string
+     *
+     * @var string|null
+     */
     private $_uriString;
 
 
+    /**
+     * Creates a new URI instance by a passed URI string
+     *
+     * URI can either be a Path, URL or URN (or any kind of URI)
+     *
+     * All parts of the URI are optional.
+     * The smallest kind of URI is a normal slash ('/')
+     *
+     * Notice that in order to use other schemes than http and https,
+     * you have to add custom schemes with fixed default ports using
+     * Uri::registerScheme()
+     *
+     * Possible formats are (among many others):
+     * <samp>
+     * /
+     * /some/path
+     * example.com/some-path
+     * example.com:8080
+     * https://example.com/test
+     * http://example.com?var1=val1&var2=val2
+     * https://example.com/test#someSubFragment
+     * urn:some:random:book
+     * whatever:whatever:whatever?whatever#whatever
+     * </samp>
+     *
+     * @param string|null $uriString the URI string to convert
+     */
     public function __construct($uriString = null)
     {
 
@@ -151,6 +308,17 @@ class Uri implements UriInterface
         return $this->_query;
     }
 
+    public function getQueryArray()
+    {
+
+        if (empty($this->_query))
+            return [];
+
+        parse_str($this->_query, $array);
+
+        return $array;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -234,6 +402,21 @@ class Uri implements UriInterface
         return $uri;
     }
 
+    public function withQueryArray(array $queryArray)
+    {
+
+        return $this->withQuery(http_build_query($queryArray));
+    }
+
+    public function withAddedQueryArray(array $array)
+    {
+
+        return $this->withQuery(array_replace_recursive(
+            $this->getQueryArray(),
+            $array
+        ));
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -245,6 +428,16 @@ class Uri implements UriInterface
         return $uri;
     }
 
+    /**
+     * Parses an URI string into the values associated with this URI instance
+     *
+     * This uses parse_url to parse the given URI string into an array
+     * and assigns the values to the current object.
+     *
+     * The values get filtered correctly by this function.
+     *
+     * @param string $uriString the string to convert into this URI instance
+     */
     private function _parse($uriString)
     {
 
@@ -296,6 +489,13 @@ class Uri implements UriInterface
             $this->_fragment = $this->_filterFragment($parts['fragment']);
     }
 
+    /**
+     * Filters a given scheme-name
+     *
+     * @param mixed $scheme the name of the scheme
+     *
+     * @return string|null the filtered scheme
+     */
     private function _filterScheme($scheme)
     {
         $scheme = strtolower($scheme);
@@ -319,12 +519,26 @@ class Uri implements UriInterface
         return $scheme;
     }
 
+    /**
+     * Filters a given host name
+     *
+     * @param mixed $host the host name to filter
+     *
+     * @return string|null the filtered host name
+     */
     private function _filterHost($host)
     {
 
         return !empty($host) ? strtolower($host) : null;
     }
 
+    /**
+     * Filters a given port number
+     *
+     * @param mixed $port the port to filter
+     *
+     * @return int|null the filtered port
+     */
     private function _filterPort($port)
     {
 
@@ -349,6 +563,13 @@ class Uri implements UriInterface
         return $port;
     }
 
+    /**
+     * Filters a given path string
+     *
+     * @param mixed $path the path string to filter
+     *
+     * @return string|null the filtered path
+     */
     private function _filterPath($path)
     {
 
@@ -367,6 +588,13 @@ class Uri implements UriInterface
         return $this->_encode($path);
     }
 
+    /**
+     * Filters a given query string
+     *
+     * @param mixed $query the query string to filter
+     *
+     * @return string|null the filtered query string
+     */
     private function _filterQuery($query)
     {
 
@@ -397,6 +625,13 @@ class Uri implements UriInterface
         return implode('&', $pairs);
     }
 
+    /**
+     * Filters a given fragment string
+     *
+     * @param mixed $fragment the fragment string
+     *
+     * @return string|null the filtered fragment
+     */
     private function _filterFragment($fragment)
     {
 
@@ -413,6 +648,20 @@ class Uri implements UriInterface
         return $this->_encode($fragment);
     }
 
+    /**
+     * Encodes a value and makes sure it's not double-encoded
+     *
+     * The following characters DON'T get encoded:
+     * a-z, A-Z, 0-9, _, -, ., ~, +, ;, ,, =, $, &, %, :, @, /, ?
+     *
+     * If the second parameter is passed, the characters
+     * !, ', (, ) and * won't be encoded as well
+     *
+     * @param string $value the value to encode
+     * @param bool|false $withDelimeters Allow extended delimeters
+     *
+     * @return string the encoded value
+     */
     private function _encode($value, $withDelimeters = false)
     {
 
@@ -464,9 +713,42 @@ class Uri implements UriInterface
         return $this->_uriString;
     }
 
+    /**
+     * Makes sure that the cached string-representation
+     * of the current URI instance is reset upon cloning.
+     */
     public function __clone()
     {
 
         $this->_uriString = null;
+    }
+
+    /**
+     * Registers a new scheme to allow in URL strings.
+     *
+     * The port appended will be used as the default port
+     * for URIs with the respective scheme
+     *
+     * @param string $name the name of the scheme
+     * @param int $port the port associated with this scheme
+     */
+    public static function registerScheme($name, $port)
+    {
+
+        self::$_schemes[$name] = $port;
+    }
+
+    /**
+     * Removes a registered scheme from the scheme register.
+     *
+     * Notice that once you removed the scheme, URIs using that scheme
+     * may throw errors
+     *
+     * @param string $name the name of the scheme to remove
+     */
+    public static function unregisterScheme($name)
+    {
+
+        unset(self::$_schemes[$name]);
     }
 }

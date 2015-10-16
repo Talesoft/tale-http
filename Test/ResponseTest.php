@@ -65,7 +65,7 @@ class ResponseTest extends TestCase
 
     public function testConstructorCanAcceptAllMessageParts()
     {
-        $body = Stream::createMemory();
+        $body = Stream::createMemoryStream();
         $status = 302;
         $headers = [
             'location' => [ 'http://example.com/' ],
@@ -150,7 +150,7 @@ class ResponseTest extends TestCase
     public function testResponseConvertsToStringProperly()
     {
 
-        $body = Stream::createMemory('rb+');
+        $body = Stream::createMemoryStream('rb+');
         $body->write('This is my response body!');
 
         $expected = "HTTP/1.1 404 Not Found\r\nX-Test: test-value\r\nX-Test-2: test-1,test-2\r\n\r\nThis is my response body!";
