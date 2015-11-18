@@ -1,13 +1,11 @@
 <?php
 /**
- * The Tale Jade Default Filters.
+ * The Tale HTTP URI-Utility.
  *
- * Contains a static filter class that provides some basic
- * filters for use inside Jade-files. You can define own filters
- * by passing the 'filter'-option to the Compiler you compile
- * your Jade files with
+ * Contains a PSR-7 compatible URI-implementation and provides
+ * useful utilities to construct and destruct URIs.
  *
- * This file is part of the Tale Jade Template Engine for PHP
+ * This file is part of the Tale HTTP Utility Library.
  *
  * LICENSE:
  * The code of this file is distributed under the MIT license.
@@ -20,7 +18,7 @@
  * @author     Talesoft <info@talesoft.io>
  * @copyright  Copyright (c) 2015 Talesoft (http://talesoft.io)
  * @license    http://licenses.talesoft.io/2015/MIT.txt MIT License
- * @version    1.0
+ * @version    1.1
  * @link       http://http.talesoft.io/docs/files/Uri.html
  * @since      File available since Release 1.0
  */
@@ -33,7 +31,7 @@ use Psr\Http\Message\UriInterface;
 /**
  * Acts as a wrapper for all kind of URIs (Including URNs and URLs)
  *
- * Compatible to the UriInterface or PSR-7
+ * Compatible to the UriInterface of PSR-7
  *
  * Examples:
  * <code>
@@ -54,7 +52,7 @@ use Psr\Http\Message\UriInterface;
  * @author     Talesoft <info@talesoft.io>
  * @copyright  Copyright (c) 2015 Talesoft (http://talesoft.io)
  * @license    http://licenses.talesoft.io/2015/MIT.txt MIT License
- * @version    1.0
+ * @version    1.1
  * @link       http://http.talesoft.io/docs/classes/Tale.Http.Uri.html
  * @since      File available since Release 1.0
  */
@@ -308,17 +306,6 @@ class Uri implements UriInterface
         return $this->_query;
     }
 
-    public function getQueryArray()
-    {
-
-        if (empty($this->_query))
-            return [];
-
-        parse_str($this->_query, $array);
-
-        return $array;
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -400,21 +387,6 @@ class Uri implements UriInterface
         $uri->_query = $this->_filterQuery($query);
 
         return $uri;
-    }
-
-    public function withQueryArray(array $queryArray)
-    {
-
-        return $this->withQuery(http_build_query($queryArray));
-    }
-
-    public function withAddedQueryArray(array $array)
-    {
-
-        return $this->withQuery(array_replace_recursive(
-            $this->getQueryArray(),
-            $array
-        ));
     }
 
     /**

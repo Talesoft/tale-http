@@ -320,21 +320,4 @@ class RequestTest extends TestCase
         $this->setExpectedException('InvalidArgumentException');
         $request = new Request(null, null, null, [$name =>  $value]);
     }
-
-    public function testResponseConvertsToStringProperly()
-    {
-
-        $body = Stream::createMemoryStream('rb+');
-        $body->write('This is my request body!');
-
-        $expected = "GET /some-path?some=query HTTP/1.1\r\nX-Test: test-value\r\nX-Test-2: test-1,test-2\r\nHost: example.com\r\n\r\nThis is my request body!";
-        $requestText = (string)((new Request())
-            ->withBody($body)
-            ->withHeader('X-Test', 'test-value')
-            ->withHeader('X-Test-2', ['test-1', 'test-2'])
-            ->withUri(new Uri('http://example.com/some-path?some=query'))
-        );
-
-        $this->assertEquals($expected, $requestText);
-    }
 }

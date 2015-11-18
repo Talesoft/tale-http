@@ -36,12 +36,6 @@ abstract class MessageBase implements MessageInterface
             $this->_addHeaders($headers);
     }
 
-    public function getProtocol()
-    {
-
-        return 'HTTP/'.$this->getProtocolVersion();
-    }
-
     /**
      * @inheritDoc
      */
@@ -163,15 +157,6 @@ abstract class MessageBase implements MessageInterface
         return $this->_body;
     }
 
-    public function getBodyString()
-    {
-
-        $string = (string)$this->_body;
-        $this->_body->rewind();
-
-        return $string;
-    }
-
     /**
      * @inheritDoc
      */
@@ -182,12 +167,6 @@ abstract class MessageBase implements MessageInterface
         $message->_body = $body;
 
         return $message;
-    }
-
-    public function withBodyString($bodyString)
-    {
-
-        return $this->withBody(new StringStream($bodyString));
     }
 
     private function _filterHeaderName($value)
@@ -214,7 +193,7 @@ abstract class MessageBase implements MessageInterface
                     "Header values should never contain CR or LF characters"
                 );
 
-            $value[$i] = str_replace(["\r", "\n", "\0"], '', $val);
+            $value[$i] = str_replace("\0", '', $val);
         }
 
         return $value;
@@ -225,16 +204,14 @@ abstract class MessageBase implements MessageInterface
 
         foreach ($headers as $name => $value) {
 
-            if (!is_string($name)) {
-
+            if (!is_string($name))
                 throw new InvalidArgumentException(
                     "The passed header name is not a string"
                 );
-            }
 
             if (strpos($name, "\r") !== false || strpos($name, "\n") !== false)
                 throw new InvalidArgumentException(
-                    "Header values should never contain CR or LF characters"
+                    "Header names should never contain CR or LF characters"
                 );
 
             $name = $this->_filterHeaderName($name);
@@ -244,28 +221,6 @@ abstract class MessageBase implements MessageInterface
             $this->_headers[$name] = $value;
             $this->_headerNames[$lowerName] = $name;
         }
-    }
-
-    abstract protected function getInitialHeaderLine();
-
-    public function __toString()
-    {
-
-        if ($this->_messageString !== null)
-            return $this->_messageString;
-
-        $crlf = "\r\n";
-        $headers = [$this->getInitialHeaderLine().$crlf];
-        foreach ($this->_headerNames as $name) {
-
-            $headers[] = "$name: ".$this->getHeaderLine($name).$crlf;
-        }
-
-        $body = strval($this->_body);
-
-        $this->_messageString = implode('', $headers).$crlf.$body;
-
-        return $this->_messageString;
     }
 
     public function __clone()

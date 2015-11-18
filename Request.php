@@ -10,8 +10,6 @@ use Psr\Http\Message\UriInterface;
 class Request extends MessageBase implements RequestInterface
 {
 
-    const DEFAULT_METHOD = Method::GET;
-
     private $_method;
     private $_uri;
     private $_requestTarget;
@@ -38,7 +36,7 @@ class Request extends MessageBase implements RequestInterface
         $this->_uri = $uri;
         $this->_method = $method !== null
                        ? $this->_filterMethod($method)
-                       : self::DEFAULT_METHOD;
+                       : Method::GET;
 
         $this->_requestTarget = null;
     }
@@ -91,42 +89,6 @@ class Request extends MessageBase implements RequestInterface
         return $this->_method;
     }
 
-    public function isMethod($method)
-    {
-
-        return $this->_method === $method;
-    }
-
-    public function isGet()
-    {
-
-        return $this->isMethod(Method::GET);
-    }
-
-    public function isPost()
-    {
-
-        return $this->isMethod(Method::POST);
-    }
-
-    public function isPut()
-    {
-
-        return $this->isMethod(Method::PUT);
-    }
-
-    public function isPostOrPut()
-    {
-
-        return $this->isPost() || $this->isPut();
-    }
-
-    public function isDelete()
-    {
-
-        return $this->isMethod(Method::DELETE);
-    }
-
     /**
      * @inheritDoc
      */
@@ -168,33 +130,6 @@ class Request extends MessageBase implements RequestInterface
         return $request->withHeader('Host', $uriHost);
     }
 
-    /**
-     *
-     * @todo Maybe automatically translate some request headers to fitting response headers?
-     * @param null       $statusCode
-     * @param array|null $headers
-     * @param null       $reasonPhrase
-     * @param null       $protocolVersion
-     *
-     * @return Response
-     */
-    public function createResponse(
-        $statusCode = null,
-        array $headers = null,
-        $reasonPhrase = null,
-        $protocolVersion = null
-    )
-    {
-
-        return new Response(
-            Stream::createTempStream(),
-            $statusCode,
-            $headers,
-            $reasonPhrase,
-            $protocolVersion ? $protocolVersion : $this->getProtocolVersion()
-        );
-    }
-
     private function _filterMethod($method)
     {
 
@@ -219,15 +154,5 @@ class Request extends MessageBase implements RequestInterface
             return new Uri();
 
         return $uri instanceof Uri ? $uri : new Uri($uri);
-    }
-
-    protected function getInitialHeaderLine()
-    {
-
-        return implode(' ', [
-            $this->getMethod(),
-            $this->getRequestTarget(),
-            $this->getProtocol()
-        ]);
     }
 }

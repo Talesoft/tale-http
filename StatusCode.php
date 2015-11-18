@@ -2,7 +2,7 @@
 
 namespace Tale\Http;
 
-class StatusCode
+final class StatusCode
 {
 
     // [Informational 1xx]
