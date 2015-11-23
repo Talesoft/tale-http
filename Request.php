@@ -150,9 +150,6 @@ class Request extends MessageBase implements RequestInterface
     private function _filterUri($uri)
     {
 
-        if ($uri === null)
-            return new Uri();
-
         return $uri instanceof Uri ? $uri : new Uri($uri);
     }
 }

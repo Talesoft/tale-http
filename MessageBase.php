@@ -16,8 +16,6 @@ abstract class MessageBase implements MessageInterface
     private $_headerNames;
     private $_body;
 
-    private $_messageString;
-
     public function __construct(
         StreamInterface $body = null,
         array $headers = null,
@@ -101,7 +99,7 @@ abstract class MessageBase implements MessageInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function withHeader($name, $value)
     {
@@ -221,11 +219,5 @@ abstract class MessageBase implements MessageInterface
             $this->_headers[$name] = $value;
             $this->_headerNames[$lowerName] = $name;
         }
-    }
-
-    public function __clone()
-    {
-
-        $this->_messageString = null;
     }
 }
