@@ -8,7 +8,7 @@ $ignore = [
     './tasks.php'
 ];
 
-$newVersion = '1.0';
+$newVersion = '1.1';
 
 
 if (!$newVersion) {

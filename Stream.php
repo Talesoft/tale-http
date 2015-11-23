@@ -4,6 +4,7 @@ namespace Tale\Http;
 
 use InvalidArgumentException;
 use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriInterface;
 use RuntimeException;
 
 class Stream implements StreamInterface
@@ -27,6 +28,9 @@ class Stream implements StreamInterface
         $this->_context = $context ? $context : self::DEFAULT_CONTEXT;
         $this->_mode = $mode ? $mode : self::DEFAULT_MODE;
 
+        if ($this->_context instanceof UriInterface)
+            $this->_context = (string)$this->_context;
+
         if (is_string($this->_context))
             $this->_context = fopen($this->_context, $this->_mode);
 
@@ -44,6 +48,19 @@ class Stream implements StreamInterface
         $this->close();
     }
 
+
+    public function getContext()
+    {
+
+        return $this->_context;
+    }
+
+    public function getMode()
+    {
+
+        return $this->_mode;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -51,6 +68,7 @@ class Stream implements StreamInterface
     {
 
         if (!$this->_context) {
+
             return;
         }
 
@@ -234,6 +252,7 @@ class Stream implements StreamInterface
     {
 
         if (!$this->isReadable()) {
+
             return '';
         }
 
@@ -242,6 +261,8 @@ class Stream implements StreamInterface
 
         return $this->getContents();
     }
+
+    private function __clone() {}
 
     public static function createMemoryStream($mode = null)
     {
@@ -253,7 +274,6 @@ class Stream implements StreamInterface
     {
 
         //$maxMemory is in BYTES
-
         $context = self::TEMP;
 
         if ($maxMemory)

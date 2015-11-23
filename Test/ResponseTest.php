@@ -146,22 +146,4 @@ class ResponseTest extends TestCase
         $this->setExpectedException('InvalidArgumentException');
         $request = new Response(null, 200, [$name =>  $value]);
     }
-
-    public function testResponseConvertsToStringProperly()
-    {
-
-        $body = Stream::createMemoryStream('rb+');
-        $body->write('This is my response body!');
-
-        $expected = "HTTP/1.1 404 Not Found\r\nX-Test: test-value\r\nX-Test-2: test-1,test-2\r\n\r\nThis is my response body!";
-
-        $responseText = (string)((new Response())
-            ->withBody($body)
-            ->withHeader('X-Test', 'test-value')
-            ->withHeader('X-Test-2', ['test-1', 'test-2'])
-            ->withStatus(StatusCode::NOT_FOUND)
-        );
-
-        $this->assertEquals($expected, $responseText);
-    }
 }
