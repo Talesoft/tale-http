@@ -84,7 +84,6 @@ class Client
 
         foreach ($request->getHeaders() as $name => $value) {
 
-            var_dump("$name: ".$request->getHeaderLine($name).$crlf);
             fwrite($socket, "$name: ".$request->getHeaderLine($name).$crlf);
         }
 
