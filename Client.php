@@ -3,6 +3,7 @@
 namespace Tale\Http;
 
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 class Client
 {
@@ -15,9 +16,15 @@ class Client
         $this->_options = array_replace_recursive([
             'headers' => [],
             'timeOut' => 3,
-            'bufferSize' => 1024,
-            'baseUri' => null
+            'bufferSize' => 8192,
+            'baseUri' => null,
+            'responseClassName' => Response::class
         ], $options ? $options : []);
+
+        if (!is_subclass_of($this->_options['responseClassName'], ResponseInterface::class))
+            throw new \Exception(
+                "The passed response class doesnt comply to the PSR-7 ResponseInterface standard"
+            );
     }
 
     public function send(RequestInterface $request)
@@ -77,10 +84,10 @@ class Client
 
         $crlf = "\r\n";
         fwrite($socket, implode(' ', [
-            $request->getMethod(),
-            ($path ? $path : '/').(!empty($query) ? "?$query" : ''),
-            'HTTP/'.$request->getProtocolVersion()
-        ]).$crlf);
+                $request->getMethod(),
+                ($path ? $path : '/').(!empty($query) ? "?$query" : ''),
+                'HTTP/'.$request->getProtocolVersion()
+            ]).$crlf);
 
         foreach ($request->getHeaders() as $name => $value) {
 
@@ -98,38 +105,84 @@ class Client
             }
         }
 
-        $responseContent = stream_get_contents($socket);
+        $initialHeader = fgets($socket, $this->_options['bufferSize']);
 
-        if (strncmp($responseContent, 'HTTP/', 5) !== 0)
+        if (strncmp($initialHeader, 'HTTP/', 5) !== 0)
             throw new \Exception(
                 "Failed to get response: Response is no HTTP response"
             );
 
-        $parts = explode($crlf.$crlf, $responseContent, 2);
 
-        $headerLines = explode($crlf, $parts[0]);
-        $body = $parts[1] ? $parts[1] : '';
-
-        list($protocol, $statusCode, $reasonPhrase) = explode(' ', $headerLines[0], 3);
+        $className = $this->_options['responseClassName'];
+        $response = new $className;
+        list($protocol, $statusCode, $reasonPhrase) = explode(' ', $initialHeader, 3);
         list($protocolName, $protocolVersion) = explode('/', $protocol, 2);
 
-        unset($headerLines[0]);
+        $response = $response->withProtocolVersion($protocolVersion);
 
-        $headers = [];
-        foreach ($headerLines as $line) {
+        while ($line = fgets($socket, $this->_options['bufferSize'])) {
+
+            if ($line === $crlf)
+                break;
 
             list($name, $value) = explode(':', $line, 2);
 
-            $headers[trim($name)] = trim($value);
+            $response = $response->withHeader(trim($name), [trim($value)]);
         }
 
-        return new Response(
-            $body ? new StringStream($body) : null,
-            intval($statusCode),
-            $headers,
-            $reasonPhrase,
-            $protocolVersion
-        );
+        if ($response->hasHeader('content-length')) {
+
+            $response = $response->withBody(
+                new StringStream(fread($socket, intval($response->getHeaderLine('content-length'))))
+            );
+        } else if ($response->hasHeader('transfer-encoding')) {
+
+            switch ($response->getHeaderLine('transfer-encoding')) {
+                case 'chunked':
+
+                    $stream = Stream::createTempStream(null, $this->_options['bufferSize']);
+
+                    while ($line = fgets($socket, $this->_options['bufferSize'])) {
+
+                        if ($line === $crlf)
+                            continue;
+
+                        $length = hexdec(trim($line));
+
+                        if (!is_int($length))
+                            throw new \Exception(
+                                "Invalid chunked-encoded body encountered: Length is not hexadecimal"
+                            );
+
+                        if ($length < 1 || feof($socket))
+                            break;
+
+                        while ($length > 0) {
+
+                            $bufferSize = min($length, $this->_options['bufferSize']);
+                            $chunk = fread($socket, $bufferSize);
+                            $stream->write($chunk);
+                            $length -= $bufferSize;
+                        }
+
+                        $token = fread($socket, 2);
+
+                        if ($token !== $crlf)
+                            throw new \Exception(
+                                "Invalid chunked-encoded body encountered: Chunk didn't end with CRLF"
+                            );
+                    }
+
+                    $response = $response->withBody($stream);
+                    break;
+                default:
+                    throw new \Exception(
+                        "Failed to parse body: Transfer-encoding type not supported"
+                    );
+            }
+        }
+
+        return $response;
     }
 
     public function request($method, $uri, array $data = null, array $headers = null, $protocolVersion = null)
