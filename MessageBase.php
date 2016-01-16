@@ -5,6 +5,7 @@ namespace Tale\Http;
 use InvalidArgumentException;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\StreamInterface;
+use Tale\Stream\MemoryStream;
 
 abstract class MessageBase implements MessageInterface
 {
@@ -28,7 +29,7 @@ abstract class MessageBase implements MessageInterface
                                 : self::DEFAULT_VERSION;
         $this->_headers = [];
         $this->_headerNames = [];
-        $this->_body = $body ? $body : Stream::createMemoryStream();
+        $this->_body = $body ? $body : new MemoryStream();
 
         if ($headers)
             $this->_addHeaders($headers);

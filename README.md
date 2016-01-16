@@ -41,7 +41,7 @@ Define autoloader, load ServerRequest and you're ready to go
 
 include 'vendor/autoload.php';
 
-$request = new Tale\Http\ServerRequest();
+$request = Tale\Http\Factory::getServerRequest();
 
 //Print the exact same request the user sent to access this site in text form
 echo $request;
@@ -71,7 +71,7 @@ Either manually
 $response = (new Response(404))
     ->withBodyString('The page you tried to call doesn\'t exist!');
     
-$response->emit();
+Tale\Http\Emitter::emit($response);
 ```
 
 or automatically (this also invokes some request/response magic that automatically fixes response headers etc.)
@@ -86,42 +86,5 @@ $response = $request->createResponse()
     
     
 //Output response to client
-$response->emit();
+Tale\Http\Emitter::emit($response);
 ```
-
-
-## Automatic SAPI (PHP's Server API) handling
-
-As soon as the `ServerRequest` realizes that you're in a CLI-application, it will try some conversions to keep your application running smoothly.
-
-This involves taking over Command Line Arguments to `$_GET`-arguments
-
-You typically get `GET`-arguments (Query String values) via the `getQueryParams`-method of the `ServerRequest`
-
-```php
-
-//GET /index.php?controller=user&action=delete&id=15
-
-$args = $request->getQueryParams();
-
-var_dump($args); //['controller' => 'user', 'action' => 'delete', 'id' => 15]
-```
-
-Now when you call the app via the CLI, PHP usually has no method of obtaining the Query Paramaters you'd like to use (and used), so it will probably do nothing or run into errors.
-
-With Tale HTTP you can just pass those query arguments as typical Command Line Arguments and get the correct results.
-
-```bash
-$ php index.php --controller user --action delete --id 15
-```
-
-and you'll get the same results as in the example above.
-
-You might also pass a path as the first argument that get's noticed as the `REQUEST_URI` you call your page with
-
-```bash
-$ php index.php /user/delete/15
-```
-
-and your router can handle this stuff by itself (You can get this path via `$request->getUri()->getPath()` instantly.
-

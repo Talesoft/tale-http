@@ -3,6 +3,7 @@
 namespace Tale\Http;
 
 use Psr\Http\Message\UploadedFileInterface;
+use Tale\Stream;
 
 final class Factory
 {
@@ -78,7 +79,7 @@ final class Factory
     public static function getBody()
     {
 
-        return Stream::createInputStream();
+        return new Stream\InputStream();
     }
 
     public static function getHeaders()

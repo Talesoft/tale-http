@@ -5,6 +5,7 @@ use Tale\Http\Request;
 use Tale\Http\Response;
 use Tale\Http\Stream;
 use PHPUnit_Framework_TestCase as TestCase;
+use Tale\Stream\MemoryStream;
 
 class MessageTest extends TestCase
 {
@@ -16,7 +17,7 @@ class MessageTest extends TestCase
 
     public function setUp()
     {
-        $this->stream = Stream::createMemoryStream('wb+');
+        $this->stream = new MemoryStream('wb+');
         $this->message = new Response($this->stream);
     }
 
@@ -39,7 +40,7 @@ class MessageTest extends TestCase
 
     public function testBodyMutatorReturnsCloneWithChanges()
     {
-        $stream = Stream::createMemoryStream('wb+');
+        $stream = new MemoryStream('wb+');
         $message = $this->message->withBody($stream);
         $this->assertNotSame($this->message, $message);
         $this->assertSame($stream, $message->getBody());

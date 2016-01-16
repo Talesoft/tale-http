@@ -5,6 +5,7 @@ use Tale\Http\Response;
 use Tale\Http\StatusCode;
 use Tale\Http\Stream;
 use PHPUnit_Framework_TestCase as TestCase;
+use Tale\Stream\MemoryStream;
 
 class ResponseTest extends TestCase
 {
@@ -65,7 +66,7 @@ class ResponseTest extends TestCase
 
     public function testConstructorCanAcceptAllMessageParts()
     {
-        $body = Stream::createMemoryStream();
+        $body = new MemoryStream();
         $status = 302;
         $headers = [
             'location' => [ 'http://example.com/' ],
