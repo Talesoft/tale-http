@@ -1,5 +1,5 @@
 <?php
-namespace Tale\Http\Test;
+namespace Tale\Test\Http;
 
 use Tale\Http\Request;
 use Tale\Http\Response;

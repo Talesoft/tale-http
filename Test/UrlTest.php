@@ -1,5 +1,5 @@
 <?php
-namespace Tale\Http\Test;
+namespace Tale\Test\Http;
 
 use Tale\Http\Uri;
 use PHPUnit_Framework_TestCase as TestCase;
