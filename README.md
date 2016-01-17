@@ -1,8 +1,8 @@
 
 # Tale HTTP
-### A PSR-7 compatible HTTP abstraction library for PHP
+**A Tale Framework Component**
 
-## What is Tale HTTP?
+# What is Tale HTTP?
 
 Tale HTTP is a set of HTTP utilities for PHP that follow the [PSR-7](http://www.php-fig.org/psr/psr-7/) standard.
 
@@ -13,7 +13,7 @@ Tale HTTP aims to just be a small wrapper over the HTTP-environment of PHP and a
 It's a one-liner to get Tale HTTP started and it has never been so easy to modify the actual HTTP output of your application
 
 
-## Installation
+# Installation
 
 Install via Composer
 
@@ -33,7 +33,7 @@ or add it to your `package.json`
 ```
 
 
-## Usage
+# Usage
 
 Define autoloader, load ServerRequest and you're ready to go
 
