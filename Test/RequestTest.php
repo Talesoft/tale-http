@@ -6,6 +6,7 @@ use Tale\Http\Request;
 use Tale\Http\Stream;
 use Tale\Http\Uri;
 use PHPUnit_Framework_TestCase as TestCase;
+use Tale\Stream\MemoryStream;
 
 class RequestTest extends TestCase
 {
@@ -61,7 +62,7 @@ class RequestTest extends TestCase
     public function testConstructorCanAcceptAllMessageParts()
     {
         $uri     = new Uri('http://example.com/');
-        $body    = Stream::createMemoryStream();
+        $body    = new MemoryStream();
         $headers = [
             'x-foo' => ['bar'],
         ];

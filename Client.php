@@ -4,6 +4,10 @@ namespace Tale\Http;
 
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
+use Tale\Stream;
+use Tale\Stream\StringStream;
+use Tale\Stream\TempStream;
 
 class Client
 {
@@ -84,10 +88,10 @@ class Client
 
         $crlf = "\r\n";
         fwrite($socket, implode(' ', [
-                $request->getMethod(),
-                ($path ? $path : '/').(!empty($query) ? "?$query" : ''),
-                'HTTP/'.$request->getProtocolVersion()
-            ]).$crlf);
+            $request->getMethod(),
+            ($path ? $path : '/').(!empty($query) ? "?$query" : ''),
+            'HTTP/'.$request->getProtocolVersion()
+        ]).$crlf);
 
         foreach ($request->getHeaders() as $name => $value) {
 
@@ -114,6 +118,7 @@ class Client
 
 
         $className = $this->_options['responseClassName'];
+        /** @var $response ResponseInterface */
         $response = new $className;
         list($protocol, $statusCode, $reasonPhrase) = explode(' ', $initialHeader, 3);
         list($protocolName, $protocolVersion) = explode('/', $protocol, 2);
@@ -140,7 +145,7 @@ class Client
             switch ($response->getHeaderLine('transfer-encoding')) {
                 case 'chunked':
 
-                    $stream = Stream::createTempStream(null, $this->_options['bufferSize']);
+                    $stream = new TempStream(null, $this->_options['bufferSize']);
 
                     while ($line = fgets($socket, $this->_options['bufferSize'])) {
 
@@ -194,7 +199,10 @@ class Client
 
         $uri = new Uri($uri);
 
-        if ($method === Method::GET && $data) {
+        if ($data instanceof StreamInterface) {
+
+            $body = $data;
+        } else if ($method === Method::GET && $data) {
 
             $query = $uri->getQuery();
 
@@ -206,7 +214,7 @@ class Client
 
                 $uri = $uri->withQuery(http_build_query($data, '', '&', \PHP_QUERY_RFC3986));
             }
-        } else if ($data) {
+        } else if (is_array($data)) {
 
             $body = new StringStream(http_build_query($data), '', '&', \PHP_QUERY_RFC1738);
         }

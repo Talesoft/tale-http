@@ -4,6 +4,7 @@ namespace Tale\Http;
 
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
+use Tale\Stream;
 
 class UploadedFile implements UploadedFileInterface
 {
@@ -66,7 +67,7 @@ class UploadedFile implements UploadedFileInterface
         $sapi = \PHP_SAPI;
         if (empty($sapi) || strncmp('cli', $sapi, 3) === 0) {
 
-            file_put_contents($targetPath, strval($this->getStream()));
+            file_put_contents($targetPath, (string)$this->getStream());
         } else {
 
             move_uploaded_file($this->_path, $targetPath);
