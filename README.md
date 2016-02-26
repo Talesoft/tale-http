@@ -41,7 +41,7 @@ Define autoloader, load ServerRequest and you're ready to go
 
 include 'vendor/autoload.php';
 
-$request = Tale\Http\Factory::getServerRequest();
+$request = Http::getServerRequest();
 
 //Print the exact same request the user sent to access this site in text form
 echo $request;
@@ -69,9 +69,9 @@ Either manually
 ```php
 
 $response = (new Response(404))
-    ->withBodyString('The page you tried to call doesn\'t exist!');
+    ->withBody(new StringStream('The page you tried to call doesn\'t exist!'));
     
-Tale\Http\Emitter::emit($response);
+Http::emit($response);
 ```
 
 or automatically (this also invokes some request/response magic that automatically fixes response headers etc.)
@@ -82,9 +82,9 @@ $json = json_encode($someData);
 
 $response = $request->createResponse()
     ->withHeader('Content-Type', 'application/json')
-    ->withBodyString($json);
+    ->withBody(new StringStream($json));
     
     
 //Output response to client
-Tale\Http\Emitter::emit($response);
+Http::emit($response);
 ```
