@@ -1,22 +1,48 @@
 <?php
 
-namespace Tale\Http;
+namespace Tale;
 
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UploadedFileInterface;
-use Tale\Stream;
+use Tale\Http\Client;
+use Tale\Http\MessageBase;
+use Tale\Http\Method;
+use Tale\Http\ServerRequest;
+use Tale\Http\UploadedFile;
+use Tale\Http\Uri;
 
-final class Factory
+/**
+ * Class Http
+ *
+ * @package Tale
+ */
+class Http
 {
 
+    /**
+     * Http constructor.
+     */
+    private function __construct() {}
+
+    /**
+     * @param string $name
+     * @param mixed $default
+     *
+     * @return string|int
+     */
     public static function getServerParam($name, $default = null)
     {
 
         return isset($_SERVER[$name]) ? $_SERVER[$name] : $default;
     }
 
+    /**
+     * @return Uri
+     */
     public static function getUri()
     {
 
+        /** @var Uri $uri */
         $uri = new Uri();
 
         $scheme = 'http';
@@ -67,6 +93,9 @@ final class Factory
         return $uri;
     }
 
+    /**
+     * @return string
+     */
     public static function getMethod()
     {
 
@@ -76,12 +105,18 @@ final class Factory
         );
     }
 
+    /**
+     * @return Stream\InputStream
+     */
     public static function getBody()
     {
 
         return new Stream\InputStream();
     }
 
+    /**
+     * @return string[]
+     */
     public static function getHeaders()
     {
 
@@ -112,6 +147,9 @@ final class Factory
         return $headers;
     }
 
+    /**
+     * @return string
+     */
     public static function getProtocolVersion()
     {
 
@@ -123,6 +161,9 @@ final class Factory
         return $version;
     }
 
+    /**
+     * @return string[]
+     */
     public static function getQueryParams()
     {
 
@@ -132,6 +173,9 @@ final class Factory
         return $_GET;
     }
 
+    /**
+     * @return string[]
+     */
     public static function getCookieParams()
     {
 
@@ -141,6 +185,9 @@ final class Factory
         return $_COOKIE;
     }
 
+    /**
+     * @return UploadedFileInterface[]
+     */
     public static function getUploadedFiles()
     {
 
@@ -150,6 +197,11 @@ final class Factory
         return self::_filterUploadedFiles($_FILES);
     }
 
+    /**
+     * @param array $files
+     *
+     * @return UploadedFileInterface[]
+     */
     private static function _filterUploadedFiles(array $files)
     {
 
@@ -177,6 +229,11 @@ final class Factory
         return $result;
     }
 
+    /**
+     * @param array $fileInfo
+     *
+     * @return UploadedFile
+     */
     private static function _filterUploadedFile(array $fileInfo)
     {
 
@@ -194,6 +251,11 @@ final class Factory
         );
     }
 
+    /**
+     * @param array $files
+     *
+     * @return array
+     */
     private static function _filterNestedUploadedFiles(array $files)
     {
 
@@ -214,6 +276,9 @@ final class Factory
         return $result;
     }
 
+    /**
+     * @return mixed|\SimpleXMLElement
+     */
     public static function getParsedBody()
     {
 
@@ -243,6 +308,7 @@ final class Factory
                 break;
             case 'text/xml':
 
+                //TODO: replace with tale-dom?
                 return simplexml_load_string((string)$body);
                 break;
         }
@@ -251,6 +317,11 @@ final class Factory
         return $data;
     }
 
+    /**
+     * @param array $attributes
+     *
+     * @return ServerRequest
+     */
     public static function getServerRequest(array $attributes = null)
     {
 
@@ -267,5 +338,65 @@ final class Factory
             self::getParsedBody(),
             $attributes
         );
+    }
+
+    /**
+     * @param ResponseInterface $response
+     *
+     * @throws \Exception
+     */
+    public static function emit(ResponseInterface $response)
+    {
+
+        if (function_exists('headers_sent') && headers_sent())
+            throw new \Exception(
+                "Failed to emit response: HTTP headers have already been ".
+                "sent to client. Make sure you made no output until ".
+                "calling Http::emit"
+            );
+
+        $initialHeaderLine = implode(' ', [
+            'HTTP/'.$response->getProtocolVersion(),
+            $response->getStatusCode(),
+            $response->getReasonPhrase()
+        ]);
+
+        header($initialHeaderLine, true, $response->getStatusCode());
+        foreach ($response->getHeaders() as $name => $value) {
+
+            header("$name: ".implode(',', $value));
+        }
+
+        echo (string)$response->getBody();
+    }
+
+    /**
+     * @param            $uri
+     * @param array|null $data
+     * @param array|null $headers
+     * @param null       $protocolVersion
+     * @param null       $options
+     *
+     * @return ResponseInterface
+     */
+    public static function get($uri, array $data = null, array $headers = null, $protocolVersion = null, $options = null)
+    {
+
+        return (new Client($options))->get($uri, $data, $headers, $protocolVersion);
+    }
+
+    /**
+     * @param            $uri
+     * @param array|null $data
+     * @param array|null $headers
+     * @param null       $protocolVersion
+     * @param null       $options
+     *
+     * @return ResponseInterface
+     */
+    public static function post($uri, array $data = null, array $headers = null, $protocolVersion = null, $options = null)
+    {
+
+        return (new Client($options))->post($uri, $data, $headers, $protocolVersion);
     }
 }

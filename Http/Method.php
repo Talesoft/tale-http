@@ -2,7 +2,7 @@
 
 namespace Tale\Http;
 
-final class Method
+class Method
 {
 
     const GET = 'GET';
@@ -13,4 +13,6 @@ final class Method
     const TRACE = 'TRACE';
     const OPTIONS = 'OPTIONS';
     const CONNECT = 'CONNECT';
+
+    private function __construct() {}
 }

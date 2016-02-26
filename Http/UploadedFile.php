@@ -43,7 +43,7 @@ class UploadedFile implements UploadedFileInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getStream()
     {
@@ -57,7 +57,7 @@ class UploadedFile implements UploadedFileInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      *
      * @TODO: Writable checks
      */
@@ -77,7 +77,7 @@ class UploadedFile implements UploadedFileInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getSize()
     {
@@ -86,7 +86,7 @@ class UploadedFile implements UploadedFileInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getError()
     {
@@ -95,7 +95,7 @@ class UploadedFile implements UploadedFileInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getClientFilename()
     {
@@ -104,7 +104,7 @@ class UploadedFile implements UploadedFileInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getClientMediaType()
     {

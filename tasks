@@ -1,11 +1,12 @@
-#!/usr/bin/php
+
+!/usr/bin/php
 <?php
 
 $ignore = [
     './Test',
     './docs',
     './vendor',
-    './tasks.php'
+    './tasks'
 ];
 
 $newVersion = '1.2';

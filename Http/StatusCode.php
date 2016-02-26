@@ -2,7 +2,7 @@
 
 namespace Tale\Http;
 
-final class StatusCode
+class StatusCode
 {
 
     // [Informational 1xx]
@@ -153,6 +153,8 @@ final class StatusCode
         self::BANDWIDTH_LIMIT_EXCEEDED        => 'Bandwidth Limit Exceeded',
         self::NOT_EXTENDED                    => 'Not Extended'
     ];
+
+    private function __construct() {}
 
     public static function getReasonPhrases()
     {

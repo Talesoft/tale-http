@@ -33,7 +33,7 @@ class Response extends MessageBase implements ResponseInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getStatusCode()
     {
@@ -42,7 +42,9 @@ class Response extends MessageBase implements ResponseInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
+     * @return static
      */
     public function withStatus($code, $reasonPhrase = '')
     {
@@ -57,7 +59,7 @@ class Response extends MessageBase implements ResponseInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getReasonPhrase()
     {

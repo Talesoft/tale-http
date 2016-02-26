@@ -36,7 +36,7 @@ abstract class MessageBase implements MessageInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getProtocolVersion()
     {
@@ -45,7 +45,9 @@ abstract class MessageBase implements MessageInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
+     * @return static
      */
     public function withProtocolVersion($version)
     {
@@ -57,7 +59,7 @@ abstract class MessageBase implements MessageInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getHeaders()
     {
@@ -66,7 +68,7 @@ abstract class MessageBase implements MessageInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function hasHeader($name)
     {
@@ -75,7 +77,7 @@ abstract class MessageBase implements MessageInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getHeader($name)
     {
@@ -88,7 +90,7 @@ abstract class MessageBase implements MessageInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getHeaderLine($name)
     {
@@ -101,6 +103,8 @@ abstract class MessageBase implements MessageInterface
 
     /**
      * {@inheritDoc}
+     *
+     * @return static
      */
     public function withHeader($name, $value)
     {
@@ -118,7 +122,9 @@ abstract class MessageBase implements MessageInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
+     * @return static
      */
     public function withAddedHeader($name, $value)
     {
@@ -130,7 +136,9 @@ abstract class MessageBase implements MessageInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
+     * @return static
      */
     public function withoutHeader($name)
     {
@@ -148,7 +156,7 @@ abstract class MessageBase implements MessageInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getBody()
     {
@@ -157,7 +165,9 @@ abstract class MessageBase implements MessageInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
+     * @return static
      */
     public function withBody(StreamInterface $body)
     {

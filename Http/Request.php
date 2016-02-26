@@ -42,7 +42,7 @@ class Request extends MessageBase implements RequestInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getRequestTarget()
     {
@@ -67,7 +67,9 @@ class Request extends MessageBase implements RequestInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
+     * @return static
      */
     public function withRequestTarget($requestTarget)
     {
@@ -81,7 +83,7 @@ class Request extends MessageBase implements RequestInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getMethod()
     {
@@ -90,7 +92,9 @@ class Request extends MessageBase implements RequestInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
+     * @return static
      */
     public function withMethod($method)
     {
@@ -102,7 +106,7 @@ class Request extends MessageBase implements RequestInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getUri()
     {
@@ -111,7 +115,9 @@ class Request extends MessageBase implements RequestInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
+     * @return static
      */
     public function withUri(UriInterface $uri, $preserveHost = false)
     {
