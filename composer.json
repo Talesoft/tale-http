@@ -4,7 +4,7 @@
     "keywords": ["http", "request", "response", "psr-7"],
     "description": "A PSR-7 compatible HTTP utility library",
     "license": "MIT",
-    "homepage": "http://http.tale.talesoft.io",
+    "homepage": "http://docs.talesoft.io/tale-framework/tale/http",
     "authors": [
         {
             "name": "Talesoft",

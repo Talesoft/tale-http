@@ -47,7 +47,7 @@ abstract class MessageBase implements MessageInterface
     /**
      * {@inheritDoc}
      *
-     * @return static
+     * @return $this
      */
     public function withProtocolVersion($version)
     {
@@ -104,7 +104,7 @@ abstract class MessageBase implements MessageInterface
     /**
      * {@inheritDoc}
      *
-     * @return static
+     * @return $this
      */
     public function withHeader($name, $value)
     {
@@ -124,7 +124,7 @@ abstract class MessageBase implements MessageInterface
     /**
      * {@inheritDoc}
      *
-     * @return static
+     * @return $this
      */
     public function withAddedHeader($name, $value)
     {
@@ -138,7 +138,7 @@ abstract class MessageBase implements MessageInterface
     /**
      * {@inheritDoc}
      *
-     * @return static
+     * @return $this
      */
     public function withoutHeader($name)
     {
@@ -167,7 +167,7 @@ abstract class MessageBase implements MessageInterface
     /**
      * {@inheritDoc}
      *
-     * @return static
+     * @return $this
      */
     public function withBody(StreamInterface $body)
     {

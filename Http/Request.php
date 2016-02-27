@@ -69,7 +69,7 @@ class Request extends MessageBase implements RequestInterface
     /**
      * {@inheritDoc}
      *
-     * @return static
+     * @return $this
      */
     public function withRequestTarget($requestTarget)
     {
@@ -94,7 +94,7 @@ class Request extends MessageBase implements RequestInterface
     /**
      * {@inheritDoc}
      *
-     * @return static
+     * @return $this
      */
     public function withMethod($method)
     {
@@ -117,7 +117,7 @@ class Request extends MessageBase implements RequestInterface
     /**
      * {@inheritDoc}
      *
-     * @return static
+     * @return $this
      */
     public function withUri(UriInterface $uri, $preserveHost = false)
     {

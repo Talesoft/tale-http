@@ -44,7 +44,7 @@ class Response extends MessageBase implements ResponseInterface
     /**
      * {@inheritDoc}
      *
-     * @return static
+     * @return $this
      */
     public function withStatus($code, $reasonPhrase = '')
     {

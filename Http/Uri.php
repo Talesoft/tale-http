@@ -320,7 +320,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      *
-     * @return static
+     * @return $this
      */
     public function withScheme($scheme)
     {
@@ -334,7 +334,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      *
-     * @return static
+     * @return $this
      */
     public function withUserInfo($user, $password = null)
     {
@@ -349,7 +349,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      *
-     * @return static
+     * @return $this
      */
     public function withHost($host)
     {
@@ -363,7 +363,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      *
-     * @return static
+     * @return $this
      */
     public function withPort($port)
     {
@@ -376,7 +376,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      *
-     * @return static
+     * @return $this
      */
     public function withPath($path)
     {
@@ -390,7 +390,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      *
-     * @return static
+     * @return $this
      */
     public function withQuery($query)
     {
@@ -404,7 +404,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      *
-     * @return static
+     * @return $this
      */
     public function withFragment($fragment)
     {
