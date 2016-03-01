@@ -8,12 +8,12 @@ use Psr\Http\Message\StreamInterface;
 class ServerRequest extends Request implements ServerRequestInterface
 {
 
-    private $_attributes;
-    private $_queryParams;
-    private $_serverParams;
-    private $_cookieParams;
-    private $_uploadedFiles;
-    private $_parsedBody;
+    private $attributes;
+    private $queryParams;
+    private $serverParams;
+    private $cookieParams;
+    private $uploadedFiles;
+    private $parsedBody;
 
     public function __construct(
         $uri = null,
@@ -38,12 +38,12 @@ class ServerRequest extends Request implements ServerRequestInterface
             $protocolVersion
         );
 
-        $this->_attributes = $attributes ? $attributes : [];
-        $this->_serverParams = $serverParams ? $serverParams : [];
-        $this->_queryParams = $queryParams ? $queryParams : [];
-        $this->_cookieParams = $cookieParams ? $cookieParams : [];
-        $this->_uploadedFiles = $uploadedFiles ? $uploadedFiles : [];
-        $this->_parsedBody = null;
+        $this->attributes = $attributes ? $attributes : [];
+        $this->serverParams = $serverParams ? $serverParams : [];
+        $this->queryParams = $queryParams ? $queryParams : [];
+        $this->cookieParams = $cookieParams ? $cookieParams : [];
+        $this->uploadedFiles = $uploadedFiles ? $uploadedFiles : [];
+        $this->parsedBody = null;
     }
 
     /**
@@ -52,7 +52,7 @@ class ServerRequest extends Request implements ServerRequestInterface
     public function getServerParams()
     {
 
-        return $this->_serverParams;
+        return $this->serverParams;
     }
 
     /**
@@ -61,7 +61,7 @@ class ServerRequest extends Request implements ServerRequestInterface
     public function getCookieParams()
     {
 
-        return $this->_cookieParams;
+        return $this->cookieParams;
     }
 
     /**
@@ -73,8 +73,8 @@ class ServerRequest extends Request implements ServerRequestInterface
     {
 
         $request = clone $this;
-        $request->_cookieParams = array_replace(
-            $request->_cookieParams,
+        $request->cookieParams = array_replace(
+            $request->cookieParams,
             $cookies
         );
 
@@ -87,7 +87,7 @@ class ServerRequest extends Request implements ServerRequestInterface
     public function getQueryParams()
     {
 
-        return $this->_queryParams;
+        return $this->queryParams;
     }
 
     /**
@@ -99,8 +99,8 @@ class ServerRequest extends Request implements ServerRequestInterface
     {
 
         $request = clone $this;
-        $request->_queryParams = array_replace(
-            $request->_queryParams,
+        $request->queryParams = array_replace(
+            $request->queryParams,
             $query
         );
 
@@ -113,7 +113,7 @@ class ServerRequest extends Request implements ServerRequestInterface
     public function getUploadedFiles()
     {
 
-        return $this->_uploadedFiles;
+        return $this->uploadedFiles;
     }
 
     /**
@@ -125,8 +125,8 @@ class ServerRequest extends Request implements ServerRequestInterface
     {
 
         $request = clone $this;
-        $request->_uploadedFiles = array_replace_recursive(
-            $request->_uploadedFiles,
+        $request->uploadedFiles = array_replace_recursive(
+            $request->uploadedFiles,
             $uploadedFiles
         );
     }
@@ -137,7 +137,7 @@ class ServerRequest extends Request implements ServerRequestInterface
     public function getParsedBody()
     {
 
-        return $this->_parsedBody;
+        return $this->parsedBody;
     }
 
     /**
@@ -154,7 +154,7 @@ class ServerRequest extends Request implements ServerRequestInterface
             );
 
         $request = clone $this;
-        $request->_parsedBody = $data;
+        $request->parsedBody = $data;
         return $request;
     }
 
@@ -164,7 +164,7 @@ class ServerRequest extends Request implements ServerRequestInterface
     public function getAttributes()
     {
 
-        return $this->_attributes;
+        return $this->attributes;
     }
 
     /**
@@ -173,8 +173,8 @@ class ServerRequest extends Request implements ServerRequestInterface
     public function getAttribute($name, $default = null)
     {
 
-        return isset($this->_attributes[$name])
-             ? $this->_attributes[$name]
+        return isset($this->attributes[$name])
+             ? $this->attributes[$name]
              : $default;
     }
 
@@ -186,7 +186,7 @@ class ServerRequest extends Request implements ServerRequestInterface
     public function withAttribute($name, $value)
     {
         $request = clone $this;
-        $request->_attributes[$name] = $value;
+        $request->attributes[$name] = $value;
 
         return $request;
     }
@@ -200,7 +200,7 @@ class ServerRequest extends Request implements ServerRequestInterface
     {
 
         $request = clone $this;
-        unset($request->_attributes[$name]);
+        unset($request->attributes[$name]);
 
         return $request;
     }

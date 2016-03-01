@@ -194,7 +194,7 @@ class Http
         if (!isset($_FILES))
             return [];
 
-        return self::_filterUploadedFiles($_FILES);
+        return self::filterUploadedFiles($_FILES);
     }
 
     /**
@@ -202,7 +202,7 @@ class Http
      *
      * @return UploadedFileInterface[]
      */
-    private static function _filterUploadedFiles(array $files)
+    private static function filterUploadedFiles(array $files)
     {
 
         $result = [];
@@ -216,13 +216,13 @@ class Http
 
             if (is_array($fileInfo) && isset($fileInfo['tmp_name'])) {
 
-                $result[$key] = self::_filterUploadedFile($fileInfo);
+                $result[$key] = self::filterUploadedFile($fileInfo);
                 continue;
             }
 
             if (is_array($fileInfo)) {
 
-                $result[$key] = self::_filterUploadedFiles($fileInfo);
+                $result[$key] = self::filterUploadedFiles($fileInfo);
             }
         }
 
@@ -234,12 +234,12 @@ class Http
      *
      * @return UploadedFile
      */
-    private static function _filterUploadedFile(array $fileInfo)
+    private static function filterUploadedFile(array $fileInfo)
     {
 
         if (is_array($fileInfo['tmp_name'])) {
 
-            return self::_filterNestedUploadedFiles($fileInfo);
+            return self::filterNestedUploadedFiles($fileInfo);
         }
 
         return new UploadedFile(
@@ -256,7 +256,7 @@ class Http
      *
      * @return array
      */
-    private static function _filterNestedUploadedFiles(array $files)
+    private static function filterNestedUploadedFiles(array $files)
     {
 
         $result = [];
@@ -270,7 +270,7 @@ class Http
                 'type'     => $files['type'][$key]
             ];
 
-            $result[$key] = self::_filterUploadedFile($fileInfo);
+            $result[$key] = self::filterUploadedFile($fileInfo);
         }
 
         return $result;

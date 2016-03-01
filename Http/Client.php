@@ -5,27 +5,27 @@ namespace Tale\Http;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
+use Tale\ConfigurableTrait;
 use Tale\Stream;
 use Tale\Stream\StringStream;
 use Tale\Stream\TempStream;
 
 class Client
 {
-
-    private $_options;
+    use ConfigurableTrait;
 
     public function __construct(array $options = null)
     {
 
-        $this->_options = array_replace_recursive([
+        $this->defineOptions([
             'headers' => [],
             'timeOut' => 3,
             'bufferSize' => 8192,
             'baseUri' => null,
             'responseClassName' => Response::class
-        ], $options ? $options : []);
+        ], $options);
 
-        if (!is_subclass_of($this->_options['responseClassName'], ResponseInterface::class))
+        if (!is_subclass_of($this->options['responseClassName'], ResponseInterface::class))
             throw new \Exception(
                 "The passed response class doesnt comply to the PSR-7 ResponseInterface standard"
             );
@@ -34,7 +34,7 @@ class Client
     public function send(RequestInterface $request)
     {
 
-        $baseUri = new Uri($this->_options['baseUri']);
+        $baseUri = new Uri($this->options['baseUri']);
         $body = $request->getBody();
         $size = $body->getSize();
         $uri = $request->getUri();
@@ -70,7 +70,7 @@ class Client
                 "Failed to send request: No host given in the URI"
             );
 
-        foreach ($this->_options['headers'] as $name => $value)
+        foreach ($this->options['headers'] as $name => $value)
             $request = $request->withHeader($name, $value);
 
         if ($hasBody) {
@@ -80,7 +80,7 @@ class Client
 
         $request = $request->withHeader('Connection', ['close']);
 
-        $socket = @fsockopen($host, $port, $errNo, $errStr, $this->_options['timeOut']);
+        $socket = @fsockopen($host, $port, $errNo, $errStr, $this->options['timeOut']);
 
         if (!$socket)
             throw new \Exception("Failed to connect socket to [$host:$port]: $errStr");
@@ -105,11 +105,11 @@ class Client
             $body->rewind();
             while (!$body->eof()) {
 
-                fwrite($socket, $body->read($this->_options['bufferSize']));
+                fwrite($socket, $body->read($this->options['bufferSize']));
             }
         }
 
-        $initialHeader = fgets($socket, $this->_options['bufferSize']);
+        $initialHeader = fgets($socket, $this->options['bufferSize']);
 
         if (strncmp($initialHeader, 'HTTP/', 5) !== 0)
             throw new \Exception(
@@ -117,7 +117,7 @@ class Client
             );
 
 
-        $className = $this->_options['responseClassName'];
+        $className = $this->options['responseClassName'];
         /** @var $response ResponseInterface */
         $response = new $className;
         list($protocol, $statusCode, $reasonPhrase) = explode(' ', $initialHeader, 3);
@@ -125,7 +125,7 @@ class Client
 
         $response = $response->withProtocolVersion($protocolVersion);
 
-        while ($line = fgets($socket, $this->_options['bufferSize'])) {
+        while ($line = fgets($socket, $this->options['bufferSize'])) {
 
             if ($line === $crlf)
                 break;
@@ -145,9 +145,9 @@ class Client
             switch ($response->getHeaderLine('transfer-encoding')) {
                 case 'chunked':
 
-                    $stream = new TempStream(null, $this->_options['bufferSize']);
+                    $stream = new TempStream(null, $this->options['bufferSize']);
 
-                    while ($line = fgets($socket, $this->_options['bufferSize'])) {
+                    while ($line = fgets($socket, $this->options['bufferSize'])) {
 
                         if ($line === $crlf)
                             continue;
@@ -164,7 +164,7 @@ class Client
 
                         while ($length > 0) {
 
-                            $bufferSize = min($length, $this->_options['bufferSize']);
+                            $bufferSize = min($length, $this->options['bufferSize']);
                             $chunk = fread($socket, $bufferSize);
                             $stream->write($chunk);
                             $length -= $bufferSize;

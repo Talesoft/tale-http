@@ -12,10 +12,10 @@ abstract class MessageBase implements MessageInterface
 
     const DEFAULT_VERSION = '1.1';
 
-    private $_protocolVersion;
-    private $_headers;
-    private $_headerNames;
-    private $_body;
+    private $protocolVersion;
+    private $headers;
+    private $headerNames;
+    private $body;
 
     public function __construct(
         StreamInterface $body = null,
@@ -24,15 +24,15 @@ abstract class MessageBase implements MessageInterface
     )
     {
 
-        $this->_protocolVersion = $protocolVersion
+        $this->protocolVersion = $protocolVersion
                                 ? $protocolVersion
                                 : self::DEFAULT_VERSION;
-        $this->_headers = [];
-        $this->_headerNames = [];
-        $this->_body = $body ? $body : new MemoryStream();
+        $this->headers = [];
+        $this->headerNames = [];
+        $this->body = $body ? $body : new MemoryStream();
 
         if ($headers)
-            $this->_addHeaders($headers);
+            $this->addHeaders($headers);
     }
 
     /**
@@ -41,7 +41,7 @@ abstract class MessageBase implements MessageInterface
     public function getProtocolVersion()
     {
 
-        return $this->_protocolVersion;
+        return $this->protocolVersion;
     }
 
     /**
@@ -53,7 +53,7 @@ abstract class MessageBase implements MessageInterface
     {
 
         $message = clone $this;
-        $message->_protocolVersion = $version;
+        $message->protocolVersion = $version;
 
         return $message;
     }
@@ -64,7 +64,7 @@ abstract class MessageBase implements MessageInterface
     public function getHeaders()
     {
 
-        return $this->_headers;
+        return $this->headers;
     }
 
     /**
@@ -73,7 +73,7 @@ abstract class MessageBase implements MessageInterface
     public function hasHeader($name)
     {
 
-        return isset($this->_headerNames[strtolower($name)]);
+        return isset($this->headerNames[strtolower($name)]);
     }
 
     /**
@@ -85,8 +85,8 @@ abstract class MessageBase implements MessageInterface
         if (!$this->hasHeader($name))
             return [];
 
-        $name = $this->_headerNames[strtolower($name)];
-        return $this->_headers[$name];
+        $name = $this->headerNames[strtolower($name)];
+        return $this->headers[$name];
     }
 
     /**
@@ -116,7 +116,7 @@ abstract class MessageBase implements MessageInterface
         if ($message->hasHeader($name))
             $message = $message->withoutHeader($name);
 
-        $message->_addHeaders([$name => $value]);
+        $message->addHeaders([$name => $value]);
 
         return $message;
     }
@@ -147,10 +147,10 @@ abstract class MessageBase implements MessageInterface
             return clone $this;
 
         $lowerName = strtolower($name);
-        $name = $this->_headerNames[$lowerName];
+        $name = $this->headerNames[$lowerName];
 
         $message = clone $this;
-        unset($message->_headers[$name], $message->_headerNames[$lowerName]);
+        unset($message->headers[$name], $message->headerNames[$lowerName]);
 
         return $message;
     }
@@ -161,7 +161,7 @@ abstract class MessageBase implements MessageInterface
     public function getBody()
     {
 
-        return $this->_body;
+        return $this->body;
     }
 
     /**
@@ -173,18 +173,18 @@ abstract class MessageBase implements MessageInterface
     {
 
         $message = clone $this;
-        $message->_body = $body;
+        $message->body = $body;
 
         return $message;
     }
 
-    private function _filterHeaderName($value)
+    private function filterHeaderName($value)
     {
 
         return preg_replace('/[^a-zA-Z0-9\-_]/', '', $value);
     }
 
-    private function _filterHeaderValue($value)
+    private function filterHeaderValue($value)
     {
 
         if (!is_array($value))
@@ -208,7 +208,7 @@ abstract class MessageBase implements MessageInterface
         return $value;
     }
 
-    private function _addHeaders(array $headers)
+    private function addHeaders(array $headers)
     {
 
         foreach ($headers as $name => $value) {
@@ -223,12 +223,12 @@ abstract class MessageBase implements MessageInterface
                     "Header names should never contain CR or LF characters"
                 );
 
-            $name = $this->_filterHeaderName($name);
-            $value = $this->_filterHeaderValue($value);
+            $name = $this->filterHeaderName($name);
+            $value = $this->filterHeaderValue($value);
 
             $lowerName = strtolower($name);
-            $this->_headers[$name] = $value;
-            $this->_headerNames[$lowerName] = $name;
+            $this->headers[$name] = $value;
+            $this->headerNames[$lowerName] = $name;
         }
     }
 }

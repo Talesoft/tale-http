@@ -19,11 +19,11 @@ class UploadedFile implements UploadedFileInterface
     const ERROR_EXTENSION = \UPLOAD_ERR_EXTENSION;
 
 
-    private $_path;
-    private $_size;
-    private $_error;
-    private $_clientFilename;
-    private $_clientMediaType;
+    private $path;
+    private $size;
+    private $error;
+    private $clientFilename;
+    private $clientMediaType;
 
 
     public function __construct(
@@ -35,11 +35,11 @@ class UploadedFile implements UploadedFileInterface
     )
     {
 
-        $this->_path = $path;
-        $this->_size = intval($size);
-        $this->_error = intval($error);
-        $this->_clientFilename = $clientFilename;
-        $this->_clientMediaType = $clientMediaType;
+        $this->path = $path;
+        $this->size = intval($size);
+        $this->error = intval($error);
+        $this->clientFilename = $clientFilename;
+        $this->clientMediaType = $clientMediaType;
     }
 
     /**
@@ -48,12 +48,12 @@ class UploadedFile implements UploadedFileInterface
     public function getStream()
     {
 
-        if (!file_exists($this->_path))
+        if (!file_exists($this->path))
             throw new \RuntimeException(
                 "The uploaded file has already been moved"
             );
 
-        return new Stream($this->_path, 'rb+');
+        return new Stream($this->path, 'rb+');
     }
 
     /**
@@ -70,10 +70,10 @@ class UploadedFile implements UploadedFileInterface
             file_put_contents($targetPath, (string)$this->getStream());
         } else {
 
-            move_uploaded_file($this->_path, $targetPath);
+            move_uploaded_file($this->path, $targetPath);
         }
 
-        unlink($this->_path);
+        unlink($this->path);
     }
 
     /**
@@ -82,7 +82,7 @@ class UploadedFile implements UploadedFileInterface
     public function getSize()
     {
 
-        return $this->_size;
+        return $this->size;
     }
 
     /**
@@ -91,7 +91,7 @@ class UploadedFile implements UploadedFileInterface
     public function getError()
     {
 
-        return $this->_error;
+        return $this->error;
     }
 
     /**
@@ -100,7 +100,7 @@ class UploadedFile implements UploadedFileInterface
     public function getClientFilename()
     {
 
-        return $this->_clientFilename;
+        return $this->clientFilename;
     }
 
     /**
@@ -109,6 +109,6 @@ class UploadedFile implements UploadedFileInterface
     public function getClientMediaType()
     {
 
-        return $this->_clientMediaType;
+        return $this->clientMediaType;
     }
 }

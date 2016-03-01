@@ -334,10 +334,10 @@ class UriTest extends TestCase
 
         $uri = new Uri('http://example.com/path?query=string#fragment');
         $string = (string)$uri;
-        $this->assertAttributeEquals($string, '_uriString', $uri);
+        $this->assertAttributeEquals($string, 'uriString', $uri);
         $test = $uri->{$method}($value);
-        $this->assertAttributeInternalType('null', '_uriString', $test);
-        $this->assertAttributeEquals($string, '_uriString', $uri);
+        $this->assertAttributeInternalType('null', 'uriString', $test);
+        $this->assertAttributeEquals($string, 'uriString', $uri);
     }
 
     public function testPathIsProperlyEncoded()

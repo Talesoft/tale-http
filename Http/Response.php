@@ -11,8 +11,8 @@ class Response extends MessageBase implements ResponseInterface
 
     const DEFAULT_STATUS_CODE = StatusCode::OK;
 
-    private $_statusCode;
-    private $_reasonPhrase;
+    private $statusCode;
+    private $reasonPhrase;
 
     public function __construct(
         StreamInterface $body = null,
@@ -24,10 +24,10 @@ class Response extends MessageBase implements ResponseInterface
     {
         parent::__construct($body, $headers, $protocolVersion);
 
-        $this->_statusCode = $statusCode !== null
-                           ? $this->_filterStatusCode($statusCode)
+        $this->statusCode = $statusCode !== null
+                           ? $this->filterStatusCode($statusCode)
                            : self::DEFAULT_STATUS_CODE;
-        $this->_reasonPhrase = !empty($reasonPhrase)
+        $this->reasonPhrase = !empty($reasonPhrase)
                              ? $reasonPhrase
                              : null;
     }
@@ -38,7 +38,7 @@ class Response extends MessageBase implements ResponseInterface
     public function getStatusCode()
     {
 
-        return $this->_statusCode;
+        return $this->statusCode;
     }
 
     /**
@@ -50,10 +50,10 @@ class Response extends MessageBase implements ResponseInterface
     {
 
         $response = clone $this;
-        $response->_statusCode = $this->_filterStatusCode($code);
+        $response->statusCode = $this->filterStatusCode($code);
 
         if (!empty($reasonPhrase))
-            $response->_reasonPhrase = $reasonPhrase;
+            $response->reasonPhrase = $reasonPhrase;
 
         return $response;
     }
@@ -64,13 +64,13 @@ class Response extends MessageBase implements ResponseInterface
     public function getReasonPhrase()
     {
 
-        if (empty($this->_reasonPhrase))
-            return StatusCode::getReasonPhrase($this->_statusCode);
+        if (empty($this->reasonPhrase))
+            return StatusCode::getReasonPhrase($this->statusCode);
 
-        return $this->_reasonPhrase;
+        return $this->reasonPhrase;
     }
 
-    private function _filterStatusCode($code)
+    private function filterStatusCode($code)
     {
 
         if (is_string($code) && is_numeric($code))

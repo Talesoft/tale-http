@@ -78,7 +78,7 @@ class StatusCode
     const BANDWIDTH_LIMIT_EXCEEDED = 509;
     const NOT_EXTENDED = 510;
 
-    private static $_reasonPhrases = [
+    private static $reasonPhrases = [
 
         // [Informational 1xx]
         self::HTTP_CONTINUE                   => 'Continue',
@@ -159,12 +159,12 @@ class StatusCode
     public static function getReasonPhrases()
     {
 
-        return self::$_reasonPhrases;
+        return self::$reasonPhrases;
     }
 
     public static function getReasonPhrase($statusCode)
     {
 
-        return self::$_reasonPhrases[$statusCode];
+        return self::$reasonPhrases[$statusCode];
     }
 }

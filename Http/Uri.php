@@ -68,7 +68,7 @@ class Uri implements UriInterface
      *
      * @var array
      */
-    private static $_schemes = [
+    private static $schemes = [
         'http' => 80,
         'https' => 443
     ];
@@ -80,7 +80,7 @@ class Uri implements UriInterface
      *
      * @var string|null
      */
-    private $_scheme;
+    private $scheme;
 
     /**
      * The user this URI is associated with
@@ -89,7 +89,7 @@ class Uri implements UriInterface
      *
      * @var string|null
      */
-    private $_user;
+    private $user;
 
     /**
      * The password this URI is associated with
@@ -98,7 +98,7 @@ class Uri implements UriInterface
      *
      * @var string|null
      */
-    private $_password;
+    private $password;
 
     /**
      * The host this URI points to
@@ -107,7 +107,7 @@ class Uri implements UriInterface
      *
      * @var string|null
      */
-    private $_host;
+    private $host;
 
     /**
      * The port this URI points to
@@ -116,7 +116,7 @@ class Uri implements UriInterface
      *
      * @var string|null
      */
-    private $_port;
+    private $port;
 
     /**
      * The path this URI points to
@@ -125,7 +125,7 @@ class Uri implements UriInterface
      *
      * @var string|null
      */
-    private $_path;
+    private $path;
 
     /**
      * The query string this URI contains
@@ -134,7 +134,7 @@ class Uri implements UriInterface
      *
      * @var array
      */
-    private $_query;
+    private $query;
 
     /**
      * The fragment the URI contains
@@ -143,14 +143,14 @@ class Uri implements UriInterface
      *
      * @var string|null
      */
-    private $_fragment;
+    private $fragment;
 
     /**
      * A cache for the fully generated URI string
      *
      * @var string|null
      */
-    private $_uriString;
+    private $uriString;
 
 
     /**
@@ -183,18 +183,18 @@ class Uri implements UriInterface
     public function __construct($uriString = null)
     {
 
-        $this->_scheme = null;
-        $this->_user = null;
-        $this->_password = null;
-        $this->_host = null;
-        $this->_port = null;
-        $this->_path = null;
-        $this->_query = [];
-        $this->_fragment = null;
-        $this->_uriString = null;
+        $this->scheme = null;
+        $this->user = null;
+        $this->password = null;
+        $this->host = null;
+        $this->port = null;
+        $this->path = null;
+        $this->query = [];
+        $this->fragment = null;
+        $this->uriString = null;
 
         if ($uriString !== null)
-            $this->_parse($uriString);
+            $this->parse($uriString);
     }
 
     /**
@@ -203,10 +203,10 @@ class Uri implements UriInterface
     public function getScheme()
     {
 
-        if (empty($this->_scheme))
+        if (empty($this->scheme))
             return '';
 
-        return $this->_scheme;
+        return $this->scheme;
     }
 
     /**
@@ -242,13 +242,13 @@ class Uri implements UriInterface
     public function getUserInfo()
     {
 
-        if (empty($this->_user))
+        if (empty($this->user))
             return '';
 
-        $userInfo = $this->_user;
+        $userInfo = $this->user;
 
-        if (!empty($this->_password))
-            $userInfo .= ":{$this->_password}";
+        if (!empty($this->password))
+            $userInfo .= ":{$this->password}";
 
         return $userInfo;
     }
@@ -259,10 +259,10 @@ class Uri implements UriInterface
     public function getHost()
     {
 
-        if (empty($this->_host))
+        if (empty($this->host))
             return '';
 
-        return $this->_host;
+        return $this->host;
     }
 
     /**
@@ -272,14 +272,14 @@ class Uri implements UriInterface
     {
 
         $scheme = $this->getScheme();
-        if (empty($this->_port) || (
-            (isset(self::$_schemes[$scheme]) && $this->_port === self::$_schemes[$scheme])
+        if (empty($this->port) || (
+            (isset(self::$schemes[$scheme]) && $this->port === self::$schemes[$scheme])
         )) {
 
             return null;
         }
 
-        return $this->_port;
+        return $this->port;
     }
 
     /**
@@ -288,10 +288,10 @@ class Uri implements UriInterface
     public function getPath()
     {
 
-        if (empty($this->_path))
+        if (empty($this->path))
             return '';
 
-        return $this->_path;
+        return $this->path;
     }
 
     /**
@@ -300,10 +300,10 @@ class Uri implements UriInterface
     public function getQuery()
     {
 
-        if (empty($this->_query))
+        if (empty($this->query))
             return '';
 
-        return $this->_query;
+        return $this->query;
     }
 
     /**
@@ -311,10 +311,10 @@ class Uri implements UriInterface
      */
     public function getFragment()
     {
-        if (empty($this->_fragment))
+        if (empty($this->fragment))
             return '';
 
-        return $this->_fragment;
+        return $this->fragment;
     }
 
     /**
@@ -326,7 +326,7 @@ class Uri implements UriInterface
     {
 
         $uri = clone $this;
-        $uri->_scheme = $this->_filterScheme($scheme);
+        $uri->scheme = $this->filterScheme($scheme);
 
         return $uri;
     }
@@ -340,8 +340,8 @@ class Uri implements UriInterface
     {
 
         $uri = clone $this;
-        $uri->_user = !empty($user) ? $user : null;
-        $uri->_password = !empty($password) ? $password : null;
+        $uri->user = !empty($user) ? $user : null;
+        $uri->password = !empty($password) ? $password : null;
 
         return $uri;
     }
@@ -355,7 +355,7 @@ class Uri implements UriInterface
     {
 
         $uri = clone $this;
-        $uri->_host = $this->_filterHost($host);
+        $uri->host = $this->filterHost($host);
 
         return $uri;
     }
@@ -368,7 +368,7 @@ class Uri implements UriInterface
     public function withPort($port)
     {
         $uri = clone $this;
-        $uri->_port = $this->_filterPort($port);
+        $uri->port = $this->filterPort($port);
 
         return $uri;
     }
@@ -382,7 +382,7 @@ class Uri implements UriInterface
     {
 
         $uri = clone $this;
-        $uri->_path = $this->_filterPath($path);
+        $uri->path = $this->filterPath($path);
 
         return $uri;
     }
@@ -396,7 +396,7 @@ class Uri implements UriInterface
     {
 
         $uri = clone $this;
-        $uri->_query = $this->_filterQuery($query);
+        $uri->query = $this->filterQuery($query);
 
         return $uri;
     }
@@ -409,7 +409,7 @@ class Uri implements UriInterface
     public function withFragment($fragment)
     {
         $uri = clone $this;
-        $uri->_fragment = $this->_filterFragment($fragment);
+        $uri->fragment = $this->filterFragment($fragment);
 
         return $uri;
     }
@@ -424,7 +424,7 @@ class Uri implements UriInterface
      *
      * @param string $uriString the string to convert into this URI instance
      */
-    private function _parse($uriString)
+    private function parse($uriString)
     {
 
         if (!is_string($uriString))
@@ -451,28 +451,28 @@ class Uri implements UriInterface
         ], $parsed);
 
         if ($parts['scheme'])
-            $this->_scheme = $this->_filterScheme($parts['scheme']);
+            $this->scheme = $this->filterScheme($parts['scheme']);
 
         if ($parts['user'])
-            $this->_user = $parts['user'];
+            $this->user = $parts['user'];
 
         if ($parts['pass'])
-            $this->_password = $parts['pass'];
+            $this->password = $parts['pass'];
 
         if ($parts['host'])
-            $this->_host = $this->_filterHost($parts['host']);
+            $this->host = $this->filterHost($parts['host']);
 
         if ($parts['port'])
-            $this->_port = $this->_filterPort($parts['port']);
+            $this->port = $this->filterPort($parts['port']);
 
         if ($parts['path'])
-            $this->_path = $this->_filterPath($parts['path']);
+            $this->path = $this->filterPath($parts['path']);
 
         if ($parts['query'])
-            $this->_query = $this->_filterQuery($parts['query']);
+            $this->query = $this->filterQuery($parts['query']);
 
         if ($parts['fragment'])
-            $this->_fragment = $this->_filterFragment($parts['fragment']);
+            $this->fragment = $this->filterFragment($parts['fragment']);
     }
 
     /**
@@ -482,7 +482,7 @@ class Uri implements UriInterface
      *
      * @return string|null the filtered scheme
      */
-    private function _filterScheme($scheme)
+    private function filterScheme($scheme)
     {
         $scheme = strtolower($scheme);
         $scheme = preg_replace('#:(//)?$#', '', $scheme);
@@ -492,12 +492,12 @@ class Uri implements UriInterface
             return null;
         }
 
-        if (!isset(self::$_schemes[$scheme])) {
+        if (!isset(self::$schemes[$scheme])) {
 
             throw new InvalidArgumentException(
                 "Unsupported scheme $scheme, allowed schemes are ".implode(
                     ', ',
-                    array_keys(self::$_schemes)
+                    array_keys(self::$schemes)
                 )
             );
         }
@@ -512,7 +512,7 @@ class Uri implements UriInterface
      *
      * @return string|null the filtered host name
      */
-    private function _filterHost($host)
+    private function filterHost($host)
     {
 
         return !empty($host) ? strtolower($host) : null;
@@ -525,7 +525,7 @@ class Uri implements UriInterface
      *
      * @return int|null the filtered port
      */
-    private function _filterPort($port)
+    private function filterPort($port)
     {
 
         if (empty($port)) {
@@ -556,7 +556,7 @@ class Uri implements UriInterface
      *
      * @return string|null the filtered path
      */
-    private function _filterPath($path)
+    private function filterPath($path)
     {
 
         if (empty($path))
@@ -571,7 +571,7 @@ class Uri implements UriInterface
          if (empty($authority) && strncmp($path, '//', 2) === 0)
             $path = '/'.ltrim($path, '/');
 
-        return $this->_encode($path);
+        return $this->encode($path);
     }
 
     /**
@@ -581,7 +581,7 @@ class Uri implements UriInterface
      *
      * @return string|null the filtered query string
      */
-    private function _filterQuery($query)
+    private function filterQuery($query)
     {
 
         if (empty($query)) {
@@ -601,11 +601,11 @@ class Uri implements UriInterface
 
             if ($value === null) {
 
-                $pairs[$i] = $this->_encode($key, true);
+                $pairs[$i] = $this->encode($key, true);
                 continue;
             }
 
-            $pairs[$i] = $this->_encode($key, true).'='.$this->_encode($value, true);
+            $pairs[$i] = $this->encode($key, true).'='.$this->encode($value, true);
         }
 
         return implode('&', $pairs);
@@ -618,7 +618,7 @@ class Uri implements UriInterface
      *
      * @return string|null the filtered fragment
      */
-    private function _filterFragment($fragment)
+    private function filterFragment($fragment)
     {
 
         if (empty($fragment)) {
@@ -631,7 +631,7 @@ class Uri implements UriInterface
         if ($fragment[0] === '#')
             $fragment = substr($fragment, 1 );
 
-        return $this->_encode($fragment);
+        return $this->encode($fragment);
     }
 
     /**
@@ -648,7 +648,7 @@ class Uri implements UriInterface
      *
      * @return string the encoded value
      */
-    private function _encode($value, $withDelimeters = false)
+    private function encode($value, $withDelimeters = false)
     {
 
         $delims = $withDelimeters ? '!\'\(\)\*' : '';
@@ -669,8 +669,8 @@ class Uri implements UriInterface
     public function __toString()
     {
 
-        if ($this->_uriString !== null)
-            return $this->_uriString;
+        if ($this->uriString !== null)
+            return $this->uriString;
 
         $scheme = $this->getScheme();
         if (!empty($scheme))
@@ -692,11 +692,11 @@ class Uri implements UriInterface
         if (!empty($fragment))
             $fragment = '#'.$fragment;
 
-        $this->_uriString = implode('', [
+        $this->uriString = implode('', [
             $scheme, $authority, $path, $query, $fragment
         ]);
 
-        return $this->_uriString;
+        return $this->uriString;
     }
 
     /**
@@ -706,7 +706,7 @@ class Uri implements UriInterface
     public function __clone()
     {
 
-        $this->_uriString = null;
+        $this->uriString = null;
     }
 
     /**
@@ -721,7 +721,7 @@ class Uri implements UriInterface
     public static function registerScheme($name, $port)
     {
 
-        self::$_schemes[$name] = $port;
+        self::$schemes[$name] = $port;
     }
 
     /**
@@ -735,6 +735,6 @@ class Uri implements UriInterface
     public static function unregisterScheme($name)
     {
 
-        unset(self::$_schemes[$name]);
+        unset(self::$schemes[$name]);
     }
 }

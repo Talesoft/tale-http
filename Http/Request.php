@@ -10,9 +10,9 @@ use Psr\Http\Message\UriInterface;
 class Request extends MessageBase implements RequestInterface
 {
 
-    private $_method;
-    private $_uri;
-    private $_requestTarget;
+    private $method;
+    private $uri;
+    private $requestTarget;
 
     public function __construct(
         $uri = null,
@@ -25,7 +25,7 @@ class Request extends MessageBase implements RequestInterface
 
         //Make sure to handle the host header and pass it before
         //we initialize the message-base
-        $uri = $this->_filterUri($uri);
+        $uri = $this->filterUri($uri);
 
         if (!isset($headers['Host']) && $uri->getHost())
             $headers['Host'] = $uri->getHost();
@@ -33,12 +33,12 @@ class Request extends MessageBase implements RequestInterface
         parent::__construct($body, $headers, $protocolVersion);
 
 
-        $this->_uri = $uri;
-        $this->_method = $method !== null
-                       ? $this->_filterMethod($method)
+        $this->uri = $uri;
+        $this->method = $method !== null
+                       ? $this->filterMethod($method)
                        : Method::GET;
 
-        $this->_requestTarget = null;
+        $this->requestTarget = null;
     }
 
     /**
@@ -47,19 +47,19 @@ class Request extends MessageBase implements RequestInterface
     public function getRequestTarget()
     {
 
-        if (!empty($this->_requestTarget))
-            return $this->_requestTarget;
+        if (!empty($this->requestTarget))
+            return $this->requestTarget;
 
-        $target = $this->_uri->getPath();
+        $target = $this->uri->getPath();
 
         if (empty($target))
             return '/';
 
-        $query = $this->_uri->getQuery();
+        $query = $this->uri->getQuery();
         if (!empty($query))
             $target .= "?$query";
 
-        $fragment = $this->_uri->getFragment();
+        $fragment = $this->uri->getFragment();
         if (!empty($fragment))
             $target .= "#$fragment";
 
@@ -75,7 +75,7 @@ class Request extends MessageBase implements RequestInterface
     {
 
         $request = clone $this;
-        $request->_requestTarget = !empty($requestTarget)
+        $request->requestTarget = !empty($requestTarget)
                                  ? strval($requestTarget)
                                  : null;
 
@@ -88,7 +88,7 @@ class Request extends MessageBase implements RequestInterface
     public function getMethod()
     {
 
-        return $this->_method;
+        return $this->method;
     }
 
     /**
@@ -100,7 +100,7 @@ class Request extends MessageBase implements RequestInterface
     {
 
         $request = clone $this;
-        $request->_method = $this->_filterMethod($method);
+        $request->method = $this->filterMethod($method);
 
         return $request;
     }
@@ -111,7 +111,7 @@ class Request extends MessageBase implements RequestInterface
     public function getUri()
     {
 
-        return $this->_uri;
+        return $this->uri;
     }
 
     /**
@@ -123,7 +123,7 @@ class Request extends MessageBase implements RequestInterface
     {
 
         $request = clone $this;
-        $request->_uri = $this->_filterUri($uri);
+        $request->uri = $this->filterUri($uri);
 
         $uriHost = $uri->getHost();
         if ($preserveHost || empty($uriHost))
@@ -136,7 +136,7 @@ class Request extends MessageBase implements RequestInterface
         return $request->withHeader('Host', $uriHost);
     }
 
-    private function _filterMethod($method)
+    private function filterMethod($method)
     {
 
         if (!is_string($method))
@@ -153,7 +153,7 @@ class Request extends MessageBase implements RequestInterface
         return constant(Method::class."::$method");
     }
 
-    private function _filterUri($uri)
+    private function filterUri($uri)
     {
 
         return $uri instanceof Uri ? $uri : new Uri($uri);
