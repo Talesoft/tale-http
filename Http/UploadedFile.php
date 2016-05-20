@@ -2,7 +2,6 @@
 
 namespace Tale\Http;
 
-use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Tale\Stream;
 

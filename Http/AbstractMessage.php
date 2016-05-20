@@ -7,7 +7,7 @@ use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\StreamInterface;
 use Tale\Stream\MemoryStream;
 
-abstract class MessageBase implements MessageInterface
+abstract class AbstractMessage implements MessageInterface
 {
 
     const DEFAULT_VERSION = '1.1';

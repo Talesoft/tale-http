@@ -2,7 +2,7 @@
 
 namespace Tale\Http;
 
-class Method
+class Verb
 {
 
     const GET = 'GET';

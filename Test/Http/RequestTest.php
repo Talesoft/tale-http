@@ -1,7 +1,7 @@
 <?php
 namespace Tale\Test\Http;
 
-use Tale\Http\Method;
+use Tale\Http\Verb;
 use Tale\Http\Request;
 use Tale\Http\Stream;
 use Tale\Http\Uri;
@@ -21,14 +21,14 @@ class RequestTest extends TestCase
 
     public function testMethodIsGetByDefault()
     {
-        $this->assertEquals(Method::GET, $this->request->getMethod());
+        $this->assertEquals(Verb::GET, $this->request->getMethod());
     }
 
     public function testMethodMutatorReturnsCloneWithChangedMethod()
     {
         $request = $this->request->withMethod('POST');
         $this->assertNotSame($this->request, $request);
-        $this->assertEquals(Method::POST, $request->getMethod());
+        $this->assertEquals(Verb::POST, $request->getMethod());
     }
 
     public function testRequestTargetIsSlashByDefault()
@@ -68,7 +68,7 @@ class RequestTest extends TestCase
         ];
         $request = new Request(
             $uri,
-            Method::POST,
+            Verb::POST,
             $body,
             $headers
         );

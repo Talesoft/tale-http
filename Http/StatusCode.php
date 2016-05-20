@@ -114,7 +114,7 @@ class StatusCode
         self::PAYMENT_REQUIRED                => 'Payment Required',
         self::FORBIDDEN                       => 'Forbidden',
         self::NOT_FOUND                       => 'Not Found',
-        self::METHOD_NOT_ALLOWED              => 'Method Not Allowed',
+        self::METHOD_NOT_ALLOWED              => 'Verb Not Allowed',
         self::NOT_ACCEPTABLE                  => 'Not Acceptable',
         self::PROXY_AUTHENTICATION_REQUIRED   => 'Proxy Authentication Required',
         self::REQUEST_TIMEOUT                 => 'Request Timeout',

@@ -6,7 +6,7 @@ use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
-class Response extends MessageBase implements ResponseInterface
+class Response extends AbstractMessage implements ResponseInterface
 {
 
     const DEFAULT_STATUS_CODE = StatusCode::OK;

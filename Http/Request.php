@@ -7,7 +7,7 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 
-class Request extends MessageBase implements RequestInterface
+class Request extends AbstractMessage implements RequestInterface
 {
 
     private $method;
@@ -36,7 +36,7 @@ class Request extends MessageBase implements RequestInterface
         $this->uri = $uri;
         $this->method = $method !== null
                        ? $this->filterMethod($method)
-                       : Method::GET;
+                       : Verb::GET;
 
         $this->requestTarget = null;
     }
@@ -145,12 +145,12 @@ class Request extends MessageBase implements RequestInterface
             );
 
         $method = strtoupper($method);
-        if (!defined(Method::class."::$method"))
+        if (!defined(Verb::class."::$method"))
             throw new InvalidArgumentException(
                 "The passed method is not a valid HTTP method"
             );
 
-        return constant(Method::class."::$method");
+        return constant(Verb::class."::$method");
     }
 
     private function filterUri($uri)

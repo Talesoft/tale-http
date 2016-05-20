@@ -73,18 +73,3 @@ $response = (new Response(404))
     
 Http::emit($response);
 ```
-
-or automatically (this also invokes some request/response magic that automatically fixes response headers etc.)
-
-```php
-
-$json = json_encode($someData);
-
-$response = $request->createResponse()
-    ->withHeader('Content-Type', 'application/json')
-    ->withBody(new StringStream($json));
-    
-    
-//Output response to client
-Http::emit($response);
-```

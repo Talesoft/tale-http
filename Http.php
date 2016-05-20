@@ -5,8 +5,8 @@ namespace Tale;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Tale\Http\Client;
-use Tale\Http\MessageBase;
-use Tale\Http\Method;
+use Tale\Http\AbstractMessage;
+use Tale\Http\Verb;
 use Tale\Http\ServerRequest;
 use Tale\Http\UploadedFile;
 use Tale\Http\Uri;
@@ -101,7 +101,7 @@ class Http
 
         return self::getServerParam(
             'REQUEST_METHOD',
-            Method::GET
+            Verb::GET
         );
     }
 
@@ -155,7 +155,7 @@ class Http
 
         list(, $version) = explode('/', self::getServerParam(
             'SERVER_PROTOCOL',
-            'HTTP/'.MessageBase::DEFAULT_VERSION
+            'HTTP/'.AbstractMessage::DEFAULT_VERSION
         ));
 
         return $version;
@@ -285,7 +285,7 @@ class Http
         $headers = self::getHeaders();
         $contentType = isset($headers['Content-Type']) ? $headers['Content-Type'] : null;
         if (
-            (self::getMethod() === Method::POST)
+            (self::getMethod() === Verb::POST)
             && in_array(
                 $contentType,
                 ['multipart/form-data', 'application/x-www-form-urlencoded']
