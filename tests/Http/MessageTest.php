@@ -1,15 +1,16 @@
 <?php
+declare(strict_types=1);
+
 namespace Tale\Test\Http;
 
-use Tale\Http\Request;
+use PHPUnit\Framework\TestCase;
 use Tale\Http\Response;
-use Tale\Http\Stream;
-use PHPUnit_Framework_TestCase as TestCase;
+use Tale\Http\StatusCode;
+use Tale\Stream;
 use Tale\Stream\MemoryStream;
 
 class MessageTest extends TestCase
 {
-
     /** @var  Stream */
     protected $stream;
     /** @var  Response */
@@ -18,7 +19,7 @@ class MessageTest extends TestCase
     public function setUp()
     {
         $this->stream = new MemoryStream('wb+');
-        $this->message = new Response($this->stream);
+        $this->message = new Response('1.1', [], StatusCode::OK, null, $this->stream);
     }
 
     public function testProtocolHasAcceptableDefault()
@@ -114,10 +115,10 @@ class MessageTest extends TestCase
         $this->assertFalse($message2->hasHeader('X-Foo'));
 
         $headers = $message2->getHeaders();
-        $this->assertEquals(0, count($headers));
+        $this->assertCount(0, $headers);
     }
 
-    public function invalidGeneralHeaderValues()
+    public function invalidGeneralHeaderValues(): array
     {
         return [
             'null'   => [null],
@@ -128,15 +129,6 @@ class MessageTest extends TestCase
             'array'  => [['foo' => ['bar']]],
             'object' => [(object)['foo' => 'bar']],
         ];
-    }
-
-    /**
-     * @dataProvider invalidGeneralHeaderValues
-     */
-    public function testWithHeaderRaisesExceptionForInvalidNestedHeaderValue($value)
-    {
-        $this->setExpectedException('InvalidArgumentException', 'The header value can only');
-        $message = $this->message->withHeader('X-Foo', [$value]);
     }
 
     public function invalidHeaderValues()
@@ -151,24 +143,6 @@ class MessageTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider invalidHeaderValues
-     */
-    public function testWithHeaderRaisesExceptionForInvalidValueType($value)
-    {
-        $this->setExpectedException('InvalidArgumentException', 'The header value can only');
-        $message = $this->message->withHeader('X-Foo', $value);
-    }
-
-    /**
-     * @dataProvider invalidGeneralHeaderValues
-     */
-    public function testWithAddedHeaderRaisesExceptionForNonStringNonArrayValue($value)
-    {
-        $this->setExpectedException('InvalidArgumentException', 'consist of string values');
-        $message = $this->message->withAddedHeader('X-Foo', $value);
-    }
-
     public function testWithoutHeaderDoesNothingIfHeaderDoesNotExist()
     {
         $this->assertFalse($this->message->hasHeader('X-Foo'));
@@ -180,7 +154,7 @@ class MessageTest extends TestCase
     public function testHeadersInitialization()
     {
         $headers = ['X-Foo' => ['bar']];
-        $this->message = new Response(null, null, $headers);
+        $this->message = new Response('1.1', $headers, StatusCode::OK, null, new MemoryStream());
         $this->assertSame($headers, $this->message->getHeaders());
     }
 
@@ -217,7 +191,7 @@ class MessageTest extends TestCase
      */
     public function testDoesNotAllowCRLFInjectionWhenCallingWithHeader($name, $value)
     {
-        $this->setExpectedException('InvalidArgumentException');
+        $this->expectException(\InvalidArgumentException::class);
         $this->message->withHeader($name, $value);
     }
 
@@ -226,7 +200,7 @@ class MessageTest extends TestCase
      */
     public function testDoesNotAllowCRLFInjectionWhenCallingWithAddedHeader($name, $value)
     {
-        $this->setExpectedException('InvalidArgumentException');
+        $this->expectException(\InvalidArgumentException::class);
         $this->message->withAddedHeader($name, $value);
     }
 }

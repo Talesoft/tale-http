@@ -1,34 +1,45 @@
 <?php
+declare(strict_types=1);
+
 namespace Tale\Test\Http;
 
-use Tale\Http\Verb;
+use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\UriFactoryInterface;
+use Tale\Http\Method;
 use Tale\Http\Request;
-use Tale\Http\Stream;
-use Tale\Http\Uri;
-use PHPUnit_Framework_TestCase as TestCase;
 use Tale\Stream\MemoryStream;
+use Tale\Uri\Factory;
 
 class RequestTest extends TestCase
 {
-
     /** @var Request */
-    protected $request;
+    private $request;
+
+    /** @var UriFactoryInterface */
+    private $uriFactory;
+
+    public function __construct(?string $name = null, array $data = [], string $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+        $this->uriFactory = new Factory();
+    }
 
     public function setUp()
     {
-        $this->request = new Request();
+        $this->request = new Request('1.1', [], Method::GET, $this->uriFactory->createUri(), null, new MemoryStream());
     }
 
     public function testMethodIsGetByDefault()
     {
-        $this->assertEquals(Verb::GET, $this->request->getMethod());
+        $this->assertEquals(Method::GET, $this->request->getMethod());
     }
 
     public function testMethodMutatorReturnsCloneWithChangedMethod()
     {
         $request = $this->request->withMethod('POST');
         $this->assertNotSame($this->request, $request);
-        $this->assertEquals(Verb::POST, $request->getMethod());
+        $this->assertEquals(Method::POST, $request->getMethod());
     }
 
     public function testRequestTargetIsSlashByDefault()
@@ -51,9 +62,9 @@ class RequestTest extends TestCase
 
     public function testWithUriReturnsNewInstanceWithNewUri()
     {
-        $request = $this->request->withUri(new Uri('https://example.com:10082/foo/bar?baz=bat'));
+        $request = $this->request->withUri($this->uriFactory->createUri('https://example.com:10082/foo/bar?baz=bat'));
         $this->assertNotSame($this->request, $request);
-        $request2 = $request->withUri(new Uri('/baz/bat?foo=bar'));
+        $request2 = $request->withUri($this->uriFactory->createUri('/baz/bat?foo=bar'));
         $this->assertNotSame($this->request, $request2);
         $this->assertNotSame($request, $request2);
         $this->assertEquals('/baz/bat?foo=bar', (string)$request2->getUri());
@@ -61,17 +72,12 @@ class RequestTest extends TestCase
 
     public function testConstructorCanAcceptAllMessageParts()
     {
-        $uri     = new Uri('http://example.com/');
+        $uri     = $this->uriFactory->createUri('http://example.com/');
         $body    = new MemoryStream();
         $headers = [
             'x-foo' => ['bar'],
         ];
-        $request = new Request(
-            $uri,
-            Verb::POST,
-            $body,
-            $headers
-        );
+        $request = new Request('1.1', $headers, Method::POST, $uri, null, $body);
 
         $this->assertSame($uri, $request->getUri());
         $this->assertEquals('POST', $request->getMethod());
@@ -95,15 +101,6 @@ class RequestTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider invalidRequestUri
-     */
-    public function testConstructorRaisesExceptionForInvalidUri($uri)
-    {
-        $this->setExpectedException('InvalidArgumentException', 'URI string needs to be a string value');
-        new Request($uri);
-    }
-
     public function invalidRequestMethod()
     {
         return [
@@ -117,19 +114,9 @@ class RequestTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider invalidRequestMethod
-     */
-    public function testConstructorRaisesExceptionForInvalidMethod($method)
-    {
-        $this->setExpectedException('InvalidArgumentException');
-        new Request(null, $method);
-    }
-
     public function testRequestTargetIsSlashWhenUriHasNoPathOrQuery()
     {
-        $request = (new Request())
-            ->withUri(new Uri('http://example.com'));
+        $request = $this->request->withUri($this->uriFactory->createUri('http://example.com'));
         $this->assertEquals('/', $request->getRequestTarget());
     }
 
@@ -137,36 +124,30 @@ class RequestTest extends TestCase
     {
         return [
             'absolute-uri' => [
-                (new Request())
-                    ->withUri(new Uri('https://api.example.com/user'))
-                    ->withMethod('POST'),
+                new Request('1.1', [], Method::POST, $this->uriFactory->createUri('https://api.example.com/user'), null, new MemoryStream()),
                 '/user'
             ],
             'absolute-uri-with-query' => [
-                (new Request())
-                    ->withUri(new Uri('https://api.example.com/user?foo=bar'))
-                    ->withMethod('POST'),
+                new Request('1.1', [], Method::POST, $this->uriFactory->createUri('https://api.example.com/user?foo=bar'), null, new MemoryStream()),
                 '/user?foo=bar'
             ],
             'relative-uri' => [
-                (new Request())
-                    ->withUri(new Uri('/user'))
-                    ->withMethod('GET'),
+                new Request('1.1', [], Method::GET, $this->uriFactory->createUri('/user'), null, new MemoryStream()),
                 '/user'
             ],
             'relative-uri-with-query' => [
-                (new Request())
-                    ->withUri(new Uri('/user?foo=bar'))
-                    ->withMethod('GET'),
+                new Request('1.1', [], Method::GET, $this->uriFactory->createUri('/user?foo=bar'), null, new MemoryStream()),
                 '/user?foo=bar'
-            ],
+            ]
         ];
     }
 
     /**
      * @dataProvider requestsWithUri
+     * @param RequestInterface $request
+     * @param string $expected
      */
-    public function testReturnsRequestTargetWhenUriIsPresent($request, $expected)
+    public function testReturnsRequestTargetWhenUriIsPresent(RequestInterface $request, string $expected)
     {
         $this->assertEquals($expected, $request->getRequestTarget());
     }
@@ -188,21 +169,21 @@ class RequestTest extends TestCase
      */
     public function testCanProvideARequestTarget($requestTarget)
     {
-        $request = (new Request())->withRequestTarget($requestTarget);
+        $request = $this->request->withRequestTarget($requestTarget);
         $this->assertEquals($requestTarget, $request->getRequestTarget());
     }
 
     public function testRequestTargetDoesNotCacheBetweenInstances()
     {
-        $request = (new Request())->withUri(new Uri('https://example.com/foo/bar'));
+        $request = $this->request->withUri($this->uriFactory->createUri('https://example.com/foo/bar'));
         $original = $request->getRequestTarget();
-        $newRequest = $request->withUri(new Uri('http://mwop.net/bar/baz'));
+        $newRequest = $request->withUri($this->uriFactory->createUri('http://mwop.net/bar/baz'));
         $this->assertNotEquals($original, $newRequest->getRequestTarget());
     }
 
     public function testGetHeadersContainsHostHeaderIfUriWithHostIsPresent()
     {
-        $request = new Request('http://example.com');
+        $request = new Request('1.1', [], Method::GET, $this->uriFactory->createUri('http://example.com'), null, new MemoryStream());
         $headers = $request->getHeaders();
         $this->assertArrayHasKey('Host', $headers);
         $this->assertContains('example.com', $headers['Host']);
@@ -210,62 +191,56 @@ class RequestTest extends TestCase
 
     public function testGetHeadersContainsNoHostHeaderIfNoUriPresent()
     {
-        $request = new Request();
+        $request = new Request('1.1', [], Method::GET, $this->uriFactory->createUri(''), null, new MemoryStream());
         $headers = $request->getHeaders();
         $this->assertArrayNotHasKey('Host', $headers);
     }
 
     public function testGetHeadersContainsNoHostHeaderIfUriDoesNotContainHost()
     {
-        $request = new Request(new Uri());
+        $request = new Request('1.1', [], Method::GET, $this->uriFactory->createUri(''), null, new MemoryStream());
         $headers = $request->getHeaders();
         $this->assertArrayNotHasKey('Host', $headers);
     }
 
     public function testGetHostHeaderReturnsUriHostWhenPresent()
     {
-        $request = new Request('http://example.com');
+        $request = new Request('1.1', [], Method::GET, $this->uriFactory->createUri('http://example.com'), null, new MemoryStream());
         $header = $request->getHeader('host');
         $this->assertEquals(['example.com'], $header);
     }
 
     public function testGetHostHeaderReturnsEmptyArrayIfNoUriPresent()
     {
-        $request = new Request();
+        $request = new Request('1.1', [], Method::GET, $this->uriFactory->createUri(''), null, new MemoryStream());
         $this->assertSame([], $request->getHeader('host'));
     }
 
     public function testGetHostHeaderReturnsEmptyArrayIfUriDoesNotContainHost()
     {
-        $request = new Request(new Uri());
+        $request = new Request('1.1', [], Method::GET, $this->uriFactory->createUri(''), null, new MemoryStream());
         $this->assertSame([], $request->getHeader('host'));
     }
 
     public function testGetHostHeaderLineReturnsUriHostWhenPresent()
     {
-        $request = new Request('http://example.com');
+        $request = new Request('1.1', [], Method::GET, $this->uriFactory->createUri('http://example.com'), null, new MemoryStream());
         $header = $request->getHeaderLine('host');
         $this->assertContains('example.com', $header);
     }
 
     public function testGetHostHeaderLineIsEmptyIfNoUriPresent()
     {
-        $request = new Request();
-        $this->assertEmpty($request->getHeaderLine('host'));
-    }
-
-    public function testGetHostHeaderLineReturnsIsEmptyIfUriDoesNotContainHost()
-    {
-        $request = new Request(new Uri());
+        $request = new Request('1.1', [], Method::GET, $this->uriFactory->createUri(), null, new MemoryStream());
         $this->assertEmpty($request->getHeaderLine('host'));
     }
 
     public function testPassingPreserveHostFlagWhenUpdatingUriDoesNotUpdateHostHeader()
     {
-        $request = (new Request())
+        $request = (new Request('1.1', [], Method::GET, $this->uriFactory->createUri(), null, new MemoryStream()))
             ->withAddedHeader('Host', 'example.com');
 
-        $uri = (new Uri())->withHost('www.example.com');
+        $uri = ($this->uriFactory->createUri())->withHost('www.example.com');
         $new = $request->withUri($uri, true);
 
         $this->assertEquals('example.com', $new->getHeaderLine('Host'));
@@ -273,10 +248,10 @@ class RequestTest extends TestCase
 
     public function testNotPassingPreserveHostFlagWhenUpdatingUriWithoutHostDoesNotUpdateHostHeader()
     {
-        $request = (new Request())
+        $request = (new Request('1.1', [], Method::GET, $this->uriFactory->createUri(), null, new MemoryStream()))
             ->withAddedHeader('Host', 'example.com');
 
-        $uri = new Uri();
+        $uri = $this->uriFactory->createUri();
         $new = $request->withUri($uri);
 
         $this->assertEquals('example.com', $new->getHeaderLine('Host'));
@@ -284,10 +259,10 @@ class RequestTest extends TestCase
 
     public function testHostHeaderUpdatesToUriHostAndPortWhenPreserveHostDisabledAndNonStandardPort()
     {
-        $request = (new Request())
+        $request = (new Request('1.1', [], Method::GET, $this->uriFactory->createUri(), null, new MemoryStream()))
             ->withAddedHeader('Host', 'example.com');
 
-        $uri = (new Uri())
+        $uri = ($this->uriFactory->createUri())
             ->withHost('www.example.com')
             ->withPort(10081);
         $new = $request->withUri($uri);
@@ -318,7 +293,7 @@ class RequestTest extends TestCase
      */
     public function testConstructorRaisesExceptionForHeadersWithCRLFVectors($name, $value)
     {
-        $this->setExpectedException('InvalidArgumentException');
-        $request = new Request(null, null, null, [$name =>  $value]);
+        $this->expectException(\InvalidArgumentException::class);
+        $request = new Request('1.1', [$name =>  $value], Method::GET, $this->uriFactory->createUri(), null, new MemoryStream());
     }
 }

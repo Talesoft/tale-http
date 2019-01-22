@@ -1,21 +1,21 @@
 <?php
+declare(strict_types=1);
+
 namespace Tale\Test\Http;
 
+use PHPUnit\Framework\TestCase;
 use Tale\Http\Response;
 use Tale\Http\StatusCode;
-use Tale\Http\Stream;
-use PHPUnit_Framework_TestCase as TestCase;
 use Tale\Stream\MemoryStream;
 
 class ResponseTest extends TestCase
 {
-
     /** @var Response */
     protected $response;
 
     public function setUp()
     {
-        $this->response = new Response();
+        $this->response = new Response('1.1', [], StatusCode::OK, null, new MemoryStream());
     }
 
     public function testStatusCodeIs200ByDefault()
@@ -48,7 +48,7 @@ class ResponseTest extends TestCase
      */
     public function testCannotSetInvalidStatusCode($code)
     {
-        $this->setExpectedException('InvalidArgumentException');
+        $this->expectException(\InvalidArgumentException::class);
         $response = $this->response->withStatus($code);
     }
 
@@ -72,7 +72,7 @@ class ResponseTest extends TestCase
             'location' => [ 'http://example.com/' ],
         ];
 
-        $response = new Response($body, $status, $headers);
+        $response = new Response('1.1', $headers, $status, null, $body);
         $this->assertSame($body, $response->getBody());
         $this->assertEquals(302, $response->getStatusCode());
         $this->assertEquals($headers, $response->getHeaders());
@@ -88,24 +88,6 @@ class ResponseTest extends TestCase
             'too-small' => [ 1 ],
             'too-big' => [ 600 ],
         ];
-    }
-
-    /**
-     * @dataProvider invalidStatus
-     */
-    public function testConstructorRaisesExceptionForInvalidStatus($code)
-    {
-        $this->setExpectedException('InvalidArgumentException', 'StatusCode needs');
-        new Response(null, $code);
-    }
-
-    /**
-     * @dataProvider invalidResponseHeader
-     */
-    public function testConstructorRaisesExceptionForInvalidHeader($name, $value)
-    {
-        $this->setExpectedException('InvalidArgumentException');
-        new Response(null, null, [$name, $value]);
     }
 
     public function invalidResponseHeader()
@@ -144,7 +126,7 @@ class ResponseTest extends TestCase
      */
     public function testConstructorRaisesExceptionForHeadersWithCRLFVectors($name, $value)
     {
-        $this->setExpectedException('InvalidArgumentException');
-        $request = new Response(null, 200, [$name =>  $value]);
+        $this->expectException(\InvalidArgumentException::class);
+        $request = new Response('1.1', [$name =>  $value], 200, null, new MemoryStream());
     }
 }
