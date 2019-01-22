@@ -3,7 +3,7 @@
 namespace Tale\Http\ResponseTrap;
 
 use Psr\Http\Message\ResponseInterface;
-use Tale\Http\ResponseEmitterInterface\ResponseTrapInterface;
+use Tale\Http\ResponseTrapInterface;
 
 final class GlobalResponseTrap implements ResponseTrapInterface
 {
