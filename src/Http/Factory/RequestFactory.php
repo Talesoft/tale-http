@@ -8,6 +8,8 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
 use Tale\Http\Request;
+use function Tale\stream_factory;
+use function Tale\uri_factory;
 
 final class RequestFactory implements RequestFactoryInterface
 {
@@ -31,28 +33,22 @@ final class RequestFactory implements RequestFactoryInterface
      * @param StreamFactoryInterface $streamFactory
      */
     public function __construct(
-        string $protocolVersion,
-        array $headers,
-        UriFactoryInterface $uriFactory,
-        StreamFactoryInterface $streamFactory
-    )
-    {
-        $this->protocolVersion = $protocolVersion;
+        UriFactoryInterface $uriFactory = null,
+        StreamFactoryInterface $streamFactory = null,
+        array $headers = [],
+        string $protocolVersion = Request::VERSION_1_1
+    ) {
+    
+        $this->uriFactory = $uriFactory ?? uri_factory();
+        $this->streamFactory = $streamFactory ?? stream_factory();
         $this->headers = $headers;
-        $this->uriFactory = $uriFactory;
-        $this->streamFactory = $streamFactory;
+        $this->protocolVersion = $protocolVersion;
     }
 
     public function createRequest(string $method, $uri): RequestInterface
     {
         $uri = $uri instanceof UriInterface ? $uri : $this->uriFactory->createUri($uri);
-        return new Request(
-            $this->protocolVersion,
-            $this->headers,
-            $method,
-            $uri,
-            null,
-            $this->streamFactory->createStream()
-        );
+        $body = $this->streamFactory->createStream();
+        return new Request($method, $uri, $body, $this->headers, '', $this->protocolVersion);
     }
 }

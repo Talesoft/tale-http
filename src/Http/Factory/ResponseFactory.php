@@ -6,6 +6,7 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Tale\Http\Response;
+use function Tale\stream_factory;
 
 final class ResponseFactory implements ResponseFactoryInterface
 {
@@ -24,21 +25,20 @@ final class ResponseFactory implements ResponseFactoryInterface
      * @param array $headers
      * @param StreamFactoryInterface $streamFactory
      */
-    public function __construct(string $protocolVersion, array $headers, StreamFactoryInterface $streamFactory)
-    {
-        $this->protocolVersion = $protocolVersion;
+    public function __construct(
+        StreamFactoryInterface $streamFactory = null,
+        array $headers = [],
+        string $protocolVersion = Response::VERSION_1_1
+    ) {
+    
+        $this->streamFactory = $streamFactory ?? stream_factory();
         $this->headers = $headers;
-        $this->streamFactory = $streamFactory;
+        $this->protocolVersion = $protocolVersion;
     }
 
     public function createResponse(int $code = 200, string $reasonPhrase = ''): ResponseInterface
     {
-        return new Response(
-            $this->protocolVersion,
-            $this->headers,
-            $code,
-            $reasonPhrase ?: null, //For some reason, PSR-7 defaults reasonPhrase to null, but PSR-17 defaults it to ''
-            $this->streamFactory->createStream()
-        );
+        $body = $this->streamFactory->createStream();
+        return new Response($code, $body, $this->headers, $reasonPhrase, $this->protocolVersion);
     }
 }

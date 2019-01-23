@@ -13,22 +13,24 @@
     ],
     "require": {
         "php": ">=7.1.0",
+        "talesoft/tale-stream": "dev-master",
+        "talesoft/tale-uri": "dev-master",
         "psr/http-message": "^1.0",
-        "psr/http-factory": "^1.0"
+        "psr/http-factory": "^1.0",
+        "fig/http-message-util": "^1.1"
     },
     "autoload": {
         "psr-4": {
             "Tale\\": "src",
             "Tale\\Test\\": "tests"
-        }
+        },
+        "files": ["src/functions.php"]
     },
     "provides": {
         "psr/http-message-implementation": "~1.0",
         "psr/http-factory-implementation": "~1.0"
     },
     "require-dev": {
-        "talesoft/tale-dev-tool": "dev-master",
-        "talesoft/tale-stream": "^0.4.0",
-        "talesoft/tale-uri": "^0.1.0"
+        "talesoft/tale-dev-tool": "dev-master"
     }
 }

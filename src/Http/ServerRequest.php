@@ -7,7 +7,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 
-final class ServerRequest extends Request implements ServerRequestInterface
+final class ServerRequest extends AbstractRequest implements ServerRequestInterface
 {
     /**
      * @var array
@@ -40,22 +40,21 @@ final class ServerRequest extends Request implements ServerRequestInterface
     private $attributes;
 
     public function __construct(
-        string $protocolVersion,
-        array $headers,
-        string $method,
-        UriInterface $uri,
-        ?string $requestTarget,
-        StreamInterface $body,
-        array $serverParams,
-        array $queryParams,
-        array $cookieParams,
-        array $uploadedFiles,
-        $parsedBody,
-        array $attributes
-    )
-    {
-        parent::__construct($protocolVersion, $headers, $method, $uri, $requestTarget, $body);
-
+        string $method = self::METHOD_GET,
+        UriInterface $uri = null,
+        StreamInterface $body = null,
+        array $headers = [],
+        array $serverParams = [],
+        array $queryParams = [],
+        array $cookieParams = [],
+        array $uploadedFiles = [],
+        $parsedBody = null,
+        array $attributes = [],
+        string $requestTarget = '',
+        string $protocolVersion = self::VERSION_1_1
+    ) {
+    
+        parent::__construct($method, $uri, $body, $headers, $requestTarget, $protocolVersion);
         $this->serverParams = $serverParams;
         $this->queryParams = $queryParams;
         $this->cookieParams = $cookieParams;
@@ -193,9 +192,34 @@ final class ServerRequest extends Request implements ServerRequestInterface
 
     private function filterParsedBody($parsedBody)
     {
-        if (!\is_array($parsedBody) || !\is_object($parsedBody)) {
-            throw new \InvalidArgumentException('Structured data should either be an object or an array');
+        if ($parsedBody !== null && !\is_array($parsedBody) && !\is_object($parsedBody)) {
+            throw new \InvalidArgumentException('Structured data should either be null, an object or an array');
         }
         return $parsedBody;
+    }
+
+    public static function create(
+        string $method = self::METHOD_GET,
+        UriInterface $uri = null,
+        StreamInterface $body = null,
+        array $headers = [],
+        array $serverParams = [],
+        array $queryParams = [],
+        array $cookieParams = [],
+        array $uploadedFiles = [],
+        array $attributes = []
+    ): self {
+        return new self(
+            $method,
+            $uri,
+            $body,
+            $headers,
+            $serverParams,
+            $queryParams,
+            $cookieParams,
+            $uploadedFiles,
+            null,
+            $attributes
+        );
     }
 }

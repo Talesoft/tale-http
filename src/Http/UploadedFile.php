@@ -4,6 +4,7 @@ namespace Tale\Http;
 
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
+use function Tale\stream_null;
 
 final class UploadedFile implements UploadedFileInterface
 {
@@ -28,15 +29,15 @@ final class UploadedFile implements UploadedFileInterface
     private $clientMediaType;
 
     public function __construct(
-        StreamInterface $stream,
-        ?int $size,
-        int $error,
-        ?string $clientFilename,
-        ?string $clientMediaType
-    )
-    {
-        $this->stream = $stream;
-        $this->size = $size;
+        StreamInterface $stream = null,
+        ?int $size = null,
+        int $error = self::ERROR_OK,
+        ?string $clientFilename = null,
+        ?string $clientMediaType = null
+    ) {
+    
+        $this->stream = $stream ?? stream_null();
+        $this->size = $size ?? $this->stream->getSize();
         $this->error = $error;
         $this->clientFilename = $clientFilename;
         $this->clientMediaType = $clientMediaType;
@@ -75,7 +76,7 @@ final class UploadedFile implements UploadedFileInterface
                 if (!rename($uri, $targetPath)) {
                     throw new \RuntimeException("Upload move error: Failed to rename {$uri} to {$targetPath}");
                 }
-            } else if (!move_uploaded_file($uri, $targetPath)) {
+            } elseif (!move_uploaded_file($uri, $targetPath)) {
                 throw new \RuntimeException("Upload move error: Failed to move {$uri} to {$targetPath}");
             }
 
@@ -84,7 +85,6 @@ final class UploadedFile implements UploadedFileInterface
             }
             return;
         }
-
         //There is no URI associated with this stream or it's not readable, we do it manually
         $stream = $this->stream->detach();
         $fp = fopen($targetPath, 'wb');

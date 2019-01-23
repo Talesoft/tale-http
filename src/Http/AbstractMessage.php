@@ -5,9 +5,14 @@ namespace Tale\Http;
 use InvalidArgumentException;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\StreamInterface;
+use function Tale\stream_create_memory;
 
 abstract class AbstractMessage implements MessageInterface
 {
+    public const VERSION_1_0 = '1.0';
+    public const VERSION_1_1 = '1.1';
+    public const VERSION_2_0 = '2.0';
+
     /**
      * @var string
      */
@@ -28,11 +33,15 @@ abstract class AbstractMessage implements MessageInterface
      */
     private $body;
 
-    public function __construct(string $protocolVersion, array $headers, StreamInterface $body)
-    {
+    public function __construct(
+        array $headers = [],
+        StreamInterface $body = null,
+        string $protocolVersion = self::VERSION_1_1
+    ) {
+    
         $this->protocolVersion = $protocolVersion;
         $this->addHeaders($headers);
-        $this->body = $body;
+        $this->body = $body ?? stream_create_memory();
     }
 
     /**

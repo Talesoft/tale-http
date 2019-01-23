@@ -8,6 +8,8 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
 use Tale\Http\ServerRequest;
+use function Tale\stream_factory;
+use function Tale\uri_factory;
 
 final class ServerRequestFactory implements ServerRequestFactoryInterface
 {
@@ -31,29 +33,35 @@ final class ServerRequestFactory implements ServerRequestFactoryInterface
      * @param StreamFactoryInterface $streamFactory
      */
     public function __construct(
-        string $protocolVersion,
-        array $headers,
-        UriFactoryInterface $uriFactory,
-        StreamFactoryInterface $streamFactory
-    )
-    {
-        $this->protocolVersion = $protocolVersion;
+        UriFactoryInterface $uriFactory = null,
+        StreamFactoryInterface $streamFactory = null,
+        array $headers = [],
+        string $protocolVersion = ServerRequest::VERSION_1_1
+    ) {
+    
+        $this->uriFactory = $uriFactory ?? uri_factory();
+        $this->streamFactory = $streamFactory ?? stream_factory();
         $this->headers = $headers;
-        $this->uriFactory = $uriFactory;
-        $this->streamFactory = $streamFactory;
+        $this->protocolVersion = $protocolVersion;
     }
 
     public function createServerRequest(string $method, $uri, array $serverParams = []): ServerRequestInterface
     {
         $uri = $uri instanceof UriInterface ? $uri : $this->uriFactory->createUri($uri);
+        $body = $this->streamFactory->createStream();
         return new ServerRequest(
-            $this->protocolVersion,
-            $this->headers,
             $method,
             $uri,
+            $body,
+            $this->headers,
+            [],
+            [],
+            [],
+            [],
             null,
-            $this->streamFactory->createStream(),
-            $serverParams
+            [],
+            '',
+            $this->protocolVersion
         );
     }
 }

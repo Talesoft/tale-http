@@ -2,156 +2,66 @@
 
 namespace Tale\Http;
 
-use InvalidArgumentException;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
+use function Tale\stream_null;
+use function Tale\uri_factory;
 
-class Request extends AbstractMessage implements RequestInterface
+final class Request extends AbstractRequest
 {
-    /**
-     * @var string
-     */
-    private $method;
-
-    /**
-     * @var UriInterface
-     */
-    private $uri;
-
-    /**
-     * @var string|null
-     */
-    private $requestTarget;
-
-    public function __construct(
-        string $protocolVersion,
-        array $headers,
-        string $method,
-        UriInterface $uri,
-        ?string $requestTarget,
-        StreamInterface $body
-    )
-    {
-        parent::__construct($protocolVersion, $this->buildRequestHeaders($uri, $headers), $body);
-        $this->method = $this->filterMethod($method);
-        $this->uri = $uri;
-        $this->requestTarget = $requestTarget;
+    public static function create(
+        string $method = self::METHOD_GET,
+        $uri = '',
+        array $headers = [],
+        StreamInterface $body = null,
+        UriFactoryInterface $uriFactory = null
+    ): self {
+    
+        if (!($uri instanceof UriInterface) && !is_string($uri)) {
+            throw new \InvalidArgumentException('Passed uri either needs to be UriInterface instance or string');
+        }
+        $uriFactory = $uriFactory ?? uri_factory();
+        return new self($method, $uri instanceof UriInterface ? $uri : $uriFactory->createUri($uri), $body, $headers);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    final public function getRequestTarget(): string
+    public static function createGet($uri = null, array $headers = [], UriFactoryInterface $uriFactory = null): self
     {
-        if ($this->requestTarget !== null) {
-            return $this->requestTarget;
-        }
-
-        $target = $this->uri->getPath();
-        if ($target === '') {
-            return '/';
-        }
-
-        $query = $this->uri->getQuery();
-        if ($query !== '') {
-            $target .= "?$query";
-        }
-
-        $fragment = $this->uri->getFragment();
-        if ($fragment !== '') {
-            $target .= "#$fragment";
-        }
-
-        return $target;
+        return self::create(self::METHOD_GET, $uri, $headers, stream_null(), $uriFactory);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return $this
-     */
-    final public function withRequestTarget($requestTarget): self
-    {
-        $request = clone $this;
-        $request->requestTarget = (string)$requestTarget;
-        return $request;
+    public static function createPost(
+        $uri = '',
+        array $headers = [],
+        StreamInterface $body = null,
+        UriFactoryInterface $uriFactory = null
+    ): self {
+    
+        return self::create(self::METHOD_POST, $uri, $headers, $body, $uriFactory);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    final public function getMethod(): string
-    {
-        return $this->method;
+    public static function createPut(
+        $uri = '',
+        array $headers = [],
+        StreamInterface $body = null,
+        UriFactoryInterface $uriFactory = null
+    ): self {
+    
+        return self::create(self::METHOD_PUT, $uri, $headers, $body, $uriFactory);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return $this
-     */
-    final public function withMethod($method): self
-    {
-        $request = clone $this;
-        $request->method = $this->filterMethod($method);
-
-        return $request;
+    public static function createDelete(
+        $uri = '',
+        array $headers = [],
+        StreamInterface $body = null,
+        UriFactoryInterface $uriFactory = null
+    ): self {
+    
+        return self::create(self::METHOD_DELETE, $uri, $headers, $body, $uriFactory);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    final public function getUri(): UriInterface
+    public static function createOptions($uri = '', array $headers = [], UriFactoryInterface $uriFactory = null): self
     {
-        return $this->uri;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return $this
-     */
-    final public function withUri(UriInterface $uri, $preserveHost = false): self
-    {
-        $request = clone $this;
-        $request->uri = $uri;
-
-        $uriHost = $uri->getHost();
-        if ($preserveHost || $uriHost === '') {
-            return $request;
-        }
-
-        $uriPort = $uri->getPort();
-        if ($uriPort !== null) {
-            $uriHost .= ":{$uriPort}";
-        }
-        return $request->withHeader('Host', $uriHost);
-    }
-
-    private function buildRequestHeaders(UriInterface $uri, array $headers): array
-    {
-        $host = $uri->getHost();
-        if ($host === '') {
-            return $headers;
-        }
-
-        $port = $uri->getPort();
-        if ($port !== null) {
-            $host .= ":{$port}";
-        }
-
-        if (!isset($headers['host']) && !isset($headers['Host'])) {
-            $headers['Host'] = $host;
-        }
-        return $headers;
-    }
-
-    private function filterMethod($method): string
-    {
-        if (!\is_string($method)) {
-            throw new InvalidArgumentException('Passed HTTP method needs to be a string');
-        }
-        return $method;
+        return self::create(self::METHOD_OPTIONS, $uri, $headers, stream_null(), $uriFactory);
     }
 }

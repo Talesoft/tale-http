@@ -5,9 +5,8 @@ namespace Tale\Test\Http;
 
 use PHPUnit\Framework\TestCase;
 use Tale\Http\Response;
-use Tale\Http\StatusCode;
 use Tale\Stream;
-use Tale\Stream\MemoryStream;
+use function Tale\stream_create_memory;
 
 class MessageTest extends TestCase
 {
@@ -18,8 +17,8 @@ class MessageTest extends TestCase
 
     public function setUp()
     {
-        $this->stream = new MemoryStream('wb+');
-        $this->message = new Response('1.1', [], StatusCode::OK, null, $this->stream);
+        $this->stream = stream_create_memory();
+        $this->message = new Response(Response::STATUS_OK, $this->stream);
     }
 
     public function testProtocolHasAcceptableDefault()
@@ -41,7 +40,7 @@ class MessageTest extends TestCase
 
     public function testBodyMutatorReturnsCloneWithChanges()
     {
-        $stream = new MemoryStream('wb+');
+        $stream = stream_create_memory();
         $message = $this->message->withBody($stream);
         $this->assertNotSame($this->message, $message);
         $this->assertSame($stream, $message->getBody());
@@ -154,7 +153,7 @@ class MessageTest extends TestCase
     public function testHeadersInitialization()
     {
         $headers = ['X-Foo' => ['bar']];
-        $this->message = new Response('1.1', $headers, StatusCode::OK, null, new MemoryStream());
+        $this->message = new Response(Response::STATUS_OK, null, $headers);
         $this->assertSame($headers, $this->message->getHeaders());
     }
 

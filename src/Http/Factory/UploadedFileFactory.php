@@ -15,8 +15,8 @@ final class UploadedFileFactory implements UploadedFileFactoryInterface
         int $error = \UPLOAD_ERR_OK,
         string $clientFilename = null,
         string $clientMediaType = null
-    ): UploadedFileInterface
-    {
+    ): UploadedFileInterface {
+    
         return new UploadedFile($stream, $size, $error, $clientFilename, $clientMediaType);
     }
 }

@@ -14,14 +14,14 @@ use Psr\Http\Message\UploadedFileFactoryInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
+use Tale\Http\Factory\RequestFactory;
+use Tale\Http\Factory\ResponseFactory;
+use Tale\Http\Factory\ServerRequestFactory;
+use Tale\Http\Factory\UploadedFileFactory;
+use function Tale\stream_factory;
+use function Tale\uri_factory;
 
-final class Factory implements
-    RequestFactoryInterface,
-    ResponseFactoryInterface,
-    ServerRequestFactoryInterface,
-    UploadedFileFactoryInterface,
-    UriFactoryInterface,
-    StreamFactoryInterface
+final class Factory implements FactoryInterface
 {
     /** @var UriFactoryInterface */
     private $uriFactory;
@@ -51,20 +51,23 @@ final class Factory implements
      * @param UploadedFileFactoryInterface $uploadedFileFactory
      */
     public function __construct(
-        UriFactoryInterface $uriFactory,
-        StreamFactoryInterface $streamFactory,
-        RequestFactoryInterface $requestFactory,
-        ResponseFactoryInterface $responseFactory,
-        ServerRequestFactoryInterface $serverRequestFactory,
-        UploadedFileFactoryInterface $uploadedFileFactory
-    )
-    {
-        $this->uriFactory = $uriFactory;
-        $this->streamFactory = $streamFactory;
-        $this->requestFactory = $requestFactory;
-        $this->responseFactory = $responseFactory;
-        $this->serverRequestFactory = $serverRequestFactory;
-        $this->uploadedFileFactory = $uploadedFileFactory;
+        UriFactoryInterface $uriFactory = null,
+        StreamFactoryInterface $streamFactory = null,
+        RequestFactoryInterface $requestFactory = null,
+        ResponseFactoryInterface $responseFactory = null,
+        ServerRequestFactoryInterface $serverRequestFactory = null,
+        UploadedFileFactoryInterface $uploadedFileFactory = null
+    ) {
+    
+        $this->uriFactory = $uriFactory ?? uri_factory();
+        $this->streamFactory = $streamFactory ?? stream_factory();
+        $this->requestFactory = $requestFactory ?? new RequestFactory($this->uriFactory, $this->streamFactory);
+        $this->responseFactory = $responseFactory ?? new ResponseFactory($this->streamFactory);
+        $this->serverRequestFactory = $serverRequestFactory ?? new ServerRequestFactory(
+            $this->uriFactory,
+            $this->streamFactory
+        );
+        $this->uploadedFileFactory = $uploadedFileFactory ?? new UploadedFileFactory();
     }
 
     public function createUri(string $uri = ''): UriInterface
@@ -108,8 +111,8 @@ final class Factory implements
         int $error = \UPLOAD_ERR_OK,
         string $clientFilename = null,
         string $clientMediaType = null
-    ): UploadedFileInterface
-    {
+    ): UploadedFileInterface {
+    
         return $this->uploadedFileFactory->createUploadedFile(
             $stream,
             $size,

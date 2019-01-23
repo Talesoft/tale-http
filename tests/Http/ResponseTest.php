@@ -5,8 +5,7 @@ namespace Tale\Test\Http;
 
 use PHPUnit\Framework\TestCase;
 use Tale\Http\Response;
-use Tale\Http\StatusCode;
-use Tale\Stream\MemoryStream;
+use function Tale\stream_create_memory;
 
 class ResponseTest extends TestCase
 {
@@ -15,12 +14,12 @@ class ResponseTest extends TestCase
 
     public function setUp()
     {
-        $this->response = new Response('1.1', [], StatusCode::OK, null, new MemoryStream());
+        $this->response = new Response();
     }
 
     public function testStatusCodeIs200ByDefault()
     {
-        $this->assertEquals(StatusCode::OK, $this->response->getStatusCode());
+        $this->assertEquals(Response::STATUS_OK, $this->response->getStatusCode());
     }
 
     public function testStatusCodeMutatorReturnsCloneWithChanges()
@@ -66,13 +65,13 @@ class ResponseTest extends TestCase
 
     public function testConstructorCanAcceptAllMessageParts()
     {
-        $body = new MemoryStream();
+        $body = stream_create_memory();
         $status = 302;
         $headers = [
             'location' => [ 'http://example.com/' ],
         ];
 
-        $response = new Response('1.1', $headers, $status, null, $body);
+        $response = Response::create($status, $body, $headers);
         $this->assertSame($body, $response->getBody());
         $this->assertEquals(302, $response->getStatusCode());
         $this->assertEquals($headers, $response->getHeaders());
@@ -127,6 +126,6 @@ class ResponseTest extends TestCase
     public function testConstructorRaisesExceptionForHeadersWithCRLFVectors($name, $value)
     {
         $this->expectException(\InvalidArgumentException::class);
-        $request = new Response('1.1', [$name =>  $value], 200, null, new MemoryStream());
+        $request = Response::createOk(null, [$name => $value]);
     }
 }
